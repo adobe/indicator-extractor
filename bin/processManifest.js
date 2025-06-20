@@ -1,7 +1,6 @@
 import { BMFF, JPEG, PNG } from '@trustnxt/c2pa-ts/asset';
 import { ManifestStore } from '@trustnxt/c2pa-ts/manifest';
 import { SuperBox } from '@trustnxt/c2pa-ts/jumbf';
-import { get } from 'http';
 
 
 function getIndicatorSet(manifestStore, validationResult) {
