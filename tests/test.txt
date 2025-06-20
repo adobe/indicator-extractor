@@ -1,0 +1,11 @@
+Hello, World!
+This is a test file for the indicator-extractor CLI tool.
+It contains multiple lines of text.
+Each line will be counted and analyzed.
+
+The tool will extract:
+- File metadata
+- Content statistics
+- Processing information
+
+This is useful for analyzing text files and generating structured JSON output.
