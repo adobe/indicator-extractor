@@ -106,8 +106,8 @@ async function processFile(inputFile, outputDir, options) {
   }
 
   if (c2paInfo && c2paInfo.hasManifest) {
-    console.log(`🔐 C2PA: Found ${c2paInfo.manifestCount} manifest(s), validation: ${c2paInfo.validationStatus}`);
-  } else if (c2paInfo && c2paInfo.validationStatus === 'no_manifest') {
+    console.log(`🔐 C2PA: Found ${c2paInfo.manifestCount} manifest(s), Valid: ${c2paInfo.validationStatus.isValid}`);
+  } else if (c2paInfo && c2paInfo.manifestCount === 0) {
     console.log('🔐 C2PA: No manifests found in file');
   } else if (c2paInfo && c2paInfo.error) {
     console.log(`🔐 C2PA: Error - ${c2paInfo.error}`);

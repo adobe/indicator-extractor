@@ -1,7 +1,6 @@
 import { BMFF, JPEG, PNG } from '@trustnxt/c2pa-ts/asset';
 import { ManifestStore } from '@trustnxt/c2pa-ts/manifest';
 import { SuperBox } from '@trustnxt/c2pa-ts/jumbf';
-import { ValidationResult } from '@trustnxt/c2pa-ts/manifest';
 
 /**
  * Process C2PA manifests from a file
@@ -46,20 +45,31 @@ async function processManifestStore(fileBuffer) {
       try {
         // Deserialize the JUMBF box structure
         const superBox = SuperBox.fromBuffer(jumbfData);
-        console.log('JUMBF structure:');
-        console.log(superBox.toString());
+        // console.log('JUMBF structure:');
+        // console.log(superBox.toString());
 
         // Read the manifest store from the JUMBF container
         const manifests = ManifestStore.read(superBox);
 
         // Validate the active manifest
         validationResult = await manifests.validate(asset);
+
+        // Extract safe validation info
+        c2paInfo.validationStatus = {
+          isValid: validationResult.isValid || false,
+          error: validationResult.error || null,
+          validationErrors: Array.isArray(validationResult.validationErrors)
+            ? validationResult.validationErrors.map(err => err.toString())
+            : [],
+        };
       } catch (e) {
         // Gracefully handle any exceptions to make sure we get a well-formed validation result
-        validationResult = ValidationResult.fromError(e);
+        c2paInfo.validationStatus = {
+          isValid: false,
+          error: e.message,
+          validationErrors: [],
+        };
       }
-
-      c2paInfo.validationStatus = validationResult;
     }
   } catch (error) {
     // File might not have C2PA data, or there might be another issue

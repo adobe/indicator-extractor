@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   testEnvironment: 'node',
   collectCoverageFrom: [
     'bin/**/*.js',
@@ -11,4 +11,5 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'html'],
   verbose: true,
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
+  maxWorkers: 1, // Run tests sequentially to avoid interference
 };
