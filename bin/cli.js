@@ -16,6 +16,7 @@ program
   .argument('<input-file>', 'input file to process')
   .argument('<output-dir>', 'output directory for the JSON file')
   .option('-p, --pretty', 'pretty print JSON output', false)
+  .option('-s, --set', 'output JPEG Trust Indicator Set grammar', false)
   .action(async(inputFile, outputDir, options) => {
     try {
       await processFile(inputFile, outputDir, options);
@@ -41,21 +42,30 @@ async function processFile(inputFile, outputDir, options) {
   // Determine if we should process as text or binary based on file extension
   const isTextFile = ['.txt', '.md', '.json', '.xml', '.html', '.css', '.js', '.ts'].includes(path.extname(inputPath).toLowerCase());
 
+  // Create output file path using input file name with .json extension
+  const inputBaseName = path.parse(inputPath).name; // Gets filename without extension
+  const outputFileName = `${inputBaseName}.json`;
+  const outputPath = path.join(outputDir, outputFileName);
+  const indicatorSetFileName = `${inputBaseName}-indicators.json`;
+  const indicatorSetPath = path.join(outputDir, indicatorSetFileName);
+
+  // Initialize variables for file content and C2PA info
   let fileContent = '';
   let fileBuffer = null;
+  let c2paInfo = null;
 
   if (isTextFile) {
     fileContent = await fs.readFile(inputPath, 'utf8');
   } else {
     // Read as buffer for binary files (including images with potential C2PA data)
     fileBuffer = await fs.readFile(inputPath);
+
+    // Process C2PA manifests
+    if (fileBuffer) {
+      c2paInfo = await processManifestStore(fileBuffer, options.set);
+    }
   }
 
-  // Process C2PA manifests if we have a binary file
-  let c2paInfo = null;
-  if (fileBuffer) {
-    c2paInfo = await processManifestStore(fileBuffer);
-  }
 
   // Process the file and create output data
   const outputData = {
@@ -83,18 +93,13 @@ async function processFile(inputFile, outputDir, options) {
     },
   };
 
-  // Create output file path using input file name with .json extension
-  const inputBaseName = path.parse(inputPath).name; // Gets filename without extension
-  const outputFileName = `${inputBaseName}.json`;
-  const outputPath = path.join(outputDir, outputFileName);
-
   // Write JSON output
   const jsonContent = options.pretty
     ? JSON.stringify(outputData, null, 2)
     : JSON.stringify(outputData);
-
   await fs.writeFile(outputPath, jsonContent, 'utf8');
 
+  // now log some information about the processed file
   console.log('✅ File processed successfully!');
   console.log(`📁 Input: ${inputPath}`);
   console.log(`📄 Output: ${outputPath}`);
@@ -107,6 +112,15 @@ async function processFile(inputFile, outputDir, options) {
 
   if (c2paInfo && c2paInfo.hasManifest) {
     console.log(`🔐 C2PA: Found ${c2paInfo.manifestCount} manifest(s), Valid: ${c2paInfo.validationStatus.isValid}`);
+
+    // if the --set option is used, output the indicator set
+    if (options.set && c2paInfo.indicatorSet) {
+      const isContent = options.pretty
+        ? JSON.stringify(c2paInfo.indicatorSet, null, 2)
+        : JSON.stringify(c2paInfo.indicatorSet);
+      await fs.writeFile(indicatorSetPath, isContent, 'utf8');
+      console.log(`🤝 Trust Indicator Set: ${indicatorSetPath}`);
+    }
   } else if (c2paInfo && c2paInfo.manifestCount === 0) {
     console.log('🔐 C2PA: No manifests found in file');
   } else if (c2paInfo && c2paInfo.error) {
