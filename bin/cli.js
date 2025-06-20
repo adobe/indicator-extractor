@@ -110,21 +110,39 @@ async function processFile(inputFile, outputDir, options) {
     console.log(`📊 Stats: Binary file, ${outputData.content.size} bytes`);
   }
 
+  // inline function to output the indicator set if requested
+  function outputIndicatorSet(indicatorSet, indicatorSetPath, prettyPrint) {
+    const indicatorSetContent = prettyPrint
+      ? JSON.stringify(indicatorSet, null, 2)
+      : JSON.stringify(indicatorSet);
+    return fs.writeFile(indicatorSetPath, indicatorSetContent, 'utf8')
+      .then(() => {
+        console.log(`🤝 Trust Indicator Set: ${indicatorSetPath}`);
+      })
+      .catch(err => {
+        console.error(`Error writing indicator set: ${err.message}`);
+      });
+  }
+
   if (c2paInfo && c2paInfo.hasManifest) {
     console.log(`🔐 C2PA: Found ${c2paInfo.manifestCount} manifest(s), Valid: ${c2paInfo.validationStatus.isValid}`);
 
     // if the --set option is used, output the indicator set
     if (options.set && c2paInfo.indicatorSet) {
-      const isContent = options.pretty
-        ? JSON.stringify(c2paInfo.indicatorSet, null, 2)
-        : JSON.stringify(c2paInfo.indicatorSet);
-      await fs.writeFile(indicatorSetPath, isContent, 'utf8');
-      console.log(`🤝 Trust Indicator Set: ${indicatorSetPath}`);
+      await outputIndicatorSet(c2paInfo.indicatorSet, indicatorSetPath, options.pretty);
     }
   } else if (c2paInfo && c2paInfo.manifestCount === 0) {
     console.log('🔐 C2PA: No manifests found in file');
   } else if (c2paInfo && c2paInfo.error) {
     console.log(`🔐 C2PA: Error - ${c2paInfo.error}`);
+  } else if (options.set) {
+    const indicatorSet = {
+      '@context': ['https://jpeg.org/jpegtrust'],
+      manifests: [],
+      content: {},
+      metadata: {},
+    };
+    await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
   }
 }
 

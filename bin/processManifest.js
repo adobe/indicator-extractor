@@ -1,12 +1,50 @@
 import { BMFF, JPEG, PNG } from '@trustnxt/c2pa-ts/asset';
 import { ManifestStore } from '@trustnxt/c2pa-ts/manifest';
 import { SuperBox } from '@trustnxt/c2pa-ts/jumbf';
+import { get } from 'http';
 
 
-function getIndicatorSet(manifestStore) {
+function getIndicatorSet(manifestStore, validationResult) {
   const indicatorSet = {
+    '@context': ['https://jpeg.org/jpegtrust'],
     manifests: [],
+    content: {},
+    metadata: {},
   };
+
+  const valStatusCodes = validationResult.toRepresentation();
+  function getResultCodeValue(statusCodes, whichCode) {
+    const found = statusCodes.find(oneCode => oneCode.code.includes(whichCode));
+    if (!found) return null;
+
+    return found.code;
+  }
+  function getAssertionStatus(statusCodes) {
+    const codes = {};
+    for (const oneCode of statusCodes) {
+      if (oneCode.code.includes('assertion')) {
+        const urlParts = oneCode.url.split('/');
+        const lastPart = urlParts[urlParts.length - 1];
+        codes[lastPart] = oneCode.code;
+      }
+    }
+
+    return codes;
+  }
+
+  function parseDistinguishedName(dnString) {
+    if (typeof dnString !== 'string') return {};
+    return dnString.split(',')
+      .map(part => part.trim())
+      .filter(Boolean)
+      .reduce((acc, pair) => {
+        const [key, ...rest] = pair.split('=');
+        if (key && rest.length > 0) {
+          acc[key.trim()] = rest.join('=').trim();
+        }
+        return acc;
+      }, {});
+  }
 
   for (const manifest of manifestStore.manifests) {
     indicatorSet.manifests.push({
@@ -24,15 +62,28 @@ function getIndicatorSet(manifestStore) {
           : manifest.claim?.claimGeneratorName || null,
         defaultAlgorithm: manifest.claim?.defaultAlgorithm || null,
         signatureRef: manifest.claim?.signatureRef || null,
+
+        // mandatory fields
+        signature_status: getResultCodeValue(valStatusCodes, 'claimSignature.') || 'unknown',
+        assertion_status: getAssertionStatus(valStatusCodes) || 'unknown',
+        content_status: getResultCodeValue(valStatusCodes, 'assertion.dataHash') || 'unknown',
+
+        // an extra because trust is part of what we do...
+        trust_status: getResultCodeValue(valStatusCodes, 'signingCredential') || 'unknown',
+
+        // test item
+        // all_status: valStatusCodes,
       },
       signature: {
         algorithm: manifest.signature.signatureData?.algorithm || null,
         certificate: {
-          issuer: manifest.signature.signatureData?.certificate?.issuer || null,
-          subject: manifest.signature.signatureData?.certificate?.subject || null,
           serialNumber: manifest.signature.signatureData?.certificate?.serialNumber || null,
-          notBefore: manifest.signature.signatureData?.certificate?.notBefore || null,
-          notAfter: manifest.signature.signatureData?.certificate?.notAfter || null,
+          issuer: parseDistinguishedName(manifest.signature.signatureData?.certificate?.issuer),
+          subject: parseDistinguishedName(manifest.signature.signatureData?.certificate?.subject),
+          validity: {
+            notBefore: manifest.signature.signatureData?.certificate?.notBefore || null,
+            notAfter: manifest.signature.signatureData?.certificate?.notAfter || null,
+          },
         },
       },
     });
@@ -90,8 +141,12 @@ async function processManifestStore(fileBuffer, asIndicatorSet) {
         const manStore = ManifestStore.read(superBox);
         c2paInfo.manifestCount = manStore.manifests.length;
 
+        // Validate the active manifest
+        // do this up front, since we will want the results in the indicator set
+        validationResult = await manStore.validate(asset);
+
         if ( asIndicatorSet ) {
-          c2paInfo.indicatorSet = getIndicatorSet(manStore);
+          c2paInfo.indicatorSet = getIndicatorSet(manStore, validationResult);
         } else {
           for (const manifest of manStore.manifests) {
             c2paInfo.manifests.push({
@@ -123,19 +178,17 @@ async function processManifestStore(fileBuffer, asIndicatorSet) {
               },
             });
           }
-
-          // Validate the active manifest
-          validationResult = await manStore.validate(asset);
-
-          // Extract safe validation info
-          c2paInfo.validationStatus = {
-            isValid: validationResult.isValid || false,
-            error: validationResult.error || null,
-            validationErrors: Array.isArray(validationResult.validationErrors)
-              ? validationResult.validationErrors.map(err => err.toString())
-              : [],
-          };
         }
+
+
+        // Extract safe validation info
+        c2paInfo.validationStatus = {
+          isValid: validationResult.isValid || false,
+          error: validationResult.error || null,
+          validationErrors: Array.isArray(validationResult.validationErrors)
+            ? validationResult.validationErrors.map(err => err.toString())
+            : [],
+        };
       } catch (e) {
         // Gracefully handle any exceptions to make sure we get a well-formed validation result
         c2paInfo.validationStatus = {
