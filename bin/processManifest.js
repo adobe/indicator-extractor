@@ -45,13 +45,21 @@ function getIndicatorSet(manifestStore, validationResult) {
       }, {});
   }
 
+  function processAssertions(assertions) {
+    const assertionsObj = {};
+    if (!assertions || !assertions.assertions) return assertionsObj;
+
+    for (const assertion of assertions.assertions) {
+      assertionsObj[assertion.label || 'unknown'] = {};
+    }
+
+    return assertionsObj;
+  }
+
   for (const manifest of manifestStore.manifests) {
     indicatorSet.manifests.push({
       label: manifest.label || null,
-      assertionCount: manifest.assertionCount || 0,
-      assertions: manifest.assertions.assertions ? manifest.assertions.assertions.map(assertion => ({
-        label: assertion.label || null,
-      })) : [],
+      assertions: processAssertions(manifest.assertions),
       claim: {
         version: manifest.claim?.version || null,
         title: manifest.claim?.title || null,
@@ -73,7 +81,7 @@ function getIndicatorSet(manifestStore, validationResult) {
         // test item
         // all_status: valStatusCodes,
       },
-      signature: {
+      claimSignature: {
         algorithm: manifest.signature.signatureData?.algorithm || null,
         certificate: {
           serialNumber: manifest.signature.signatureData?.certificate?.serialNumber || null,

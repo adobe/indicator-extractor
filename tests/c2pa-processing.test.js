@@ -168,44 +168,48 @@ describe('C2PA Image Processing', () => {
     const indicatorSetData = await testHelpers.readOutputJSON('ChatGPT_Image-indicators.json');
 
     // Verify indicator set structure
+    // check for the required properties
+    expect(indicatorSetData).toHaveProperty('@context');
+    expect(typeof indicatorSetData['@context']).toBe('object');
     expect(indicatorSetData).toHaveProperty('manifests');
     expect(Array.isArray(indicatorSetData.manifests)).toBe(true);
+    expect(indicatorSetData).toHaveProperty('content');
+    expect(typeof indicatorSetData.content).toBe('object');
 
     // If the image has C2PA manifests, verify indicator set content
     if (outputData.c2pa.hasManifest && outputData.c2pa.manifestCount > 0) {
       expect(indicatorSetData.manifests.length).toBeGreaterThan(0);
 
       // Verify each manifest in the indicator set has expected structure
-      // indicatorSetData.manifests.forEach(manifest => {
-      //   expect(manifest).toHaveProperty('label');
-      //   expect(manifest).toHaveProperty('assertionCount');
-      //   expect(manifest).toHaveProperty('assertions');
-      //   expect(manifest).toHaveProperty('claim');
-      //   expect(manifest).toHaveProperty('signature');
+      indicatorSetData.manifests.forEach(manifest => {
+        expect(manifest).toHaveProperty('label');
+        expect(manifest).toHaveProperty('assertions');
+        expect(manifest).toHaveProperty('claim');
+        expect(manifest).toHaveProperty('claimSignature');
 
-      //   // Verify claim structure
-      //   expect(manifest.claim).toHaveProperty('version');
-      //   expect(manifest.claim).toHaveProperty('title');
-      //   expect(manifest.claim).toHaveProperty('instanceID');
-      //   expect(manifest.claim).toHaveProperty('claimGenerator');
-      //   expect(manifest.claim).toHaveProperty('defaultAlgorithm');
-      //   expect(manifest.claim).toHaveProperty('signatureRef');
+        //   // Verify claim structure
+        //   expect(manifest.claim).toHaveProperty('version');
+        //   expect(manifest.claim).toHaveProperty('title');
+        //   expect(manifest.claim).toHaveProperty('instanceID');
+        //   expect(manifest.claim).toHaveProperty('claimGenerator');
+        //   expect(manifest.claim).toHaveProperty('defaultAlgorithm');
+        //   expect(manifest.claim).toHaveProperty('signatureRef');
 
-      //   // Verify signature structure
-      //   expect(manifest.signature).toHaveProperty('algorithm');
-      //   expect(manifest.signature).toHaveProperty('certificate');
-      //   expect(manifest.signature.certificate).toHaveProperty('issuer');
-      //   expect(manifest.signature.certificate).toHaveProperty('subject');
-      //   expect(manifest.signature.certificate).toHaveProperty('serialNumber');
-      //   expect(manifest.signature.certificate).toHaveProperty('notBefore');
-      //   expect(manifest.signature.certificate).toHaveProperty('notAfter');
+        //   // Verify signature structure
+        //   expect(manifest.signature).toHaveProperty('algorithm');
+        //   expect(manifest.signature).toHaveProperty('certificate');
+        //   expect(manifest.signature.certificate).toHaveProperty('issuer');
+        //   expect(manifest.signature.certificate).toHaveProperty('subject');
+        //   expect(manifest.signature.certificate).toHaveProperty('serialNumber');
+        //   expect(manifest.signature.certificate).toHaveProperty('notBefore');
+        //   expect(manifest.signature.certificate).toHaveProperty('notAfter');
 
       //   // Verify assertions structure
       //   expect(Array.isArray(manifest.assertions)).toBe(true);
       //   manifest.assertions.forEach(assertion => {
       //     expect(assertion).toHaveProperty('label');
       //   });
-      // });
+      });
     }
 
     // Check CLI output mentions Trust Indicator Set
