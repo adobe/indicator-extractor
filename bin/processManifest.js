@@ -58,8 +58,14 @@ function getIndicatorSet(manifestStore, validationResult) {
       function convertHashFields(obj) {
         if (obj && typeof obj === 'object') {
           for (const key of Object.keys(obj)) {
-            if (key === 'hash' && obj[key] instanceof Uint8Array) {
-              obj[key] = Buffer.from(obj[key]).toString('base64');
+            if (key === 'hash') {
+              if (obj[key] instanceof Uint8Array) {
+                obj[key] = Buffer.from(obj[key]).toString('base64');
+              } else if (Array.isArray(obj[key]) && obj[key].every(n => typeof n === 'number')) {
+                obj[key] = Buffer.from(obj[key]).toString('base64');
+              } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                convertHashFields(obj[key]);
+              }
             } else if (typeof obj[key] === 'object' && obj[key] !== null) {
               convertHashFields(obj[key]);
             }
