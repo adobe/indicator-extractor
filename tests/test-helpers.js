@@ -19,6 +19,7 @@ class TestHelpers {
       chatgptImage: path.join(this.testFilesDir, 'ChatGPT_Image.png'),
       multipleManifests: path.join(this.testFilesDir, 'Multiple_Manifests.jpg'),
       simplePhoto: path.join(this.testFilesDir, 'SimplePhoto.jpeg'),
+      standardManifest: path.join(this.testFilesDir, 's01-standard-manifest-with-actions-2ed.jpeg'),
     };
   }
 
@@ -152,6 +153,111 @@ class TestHelpers {
     expect(outputData.c2pa).toHaveProperty('fileFormat');
     expect(outputData.c2pa).toHaveProperty('hasManifest');
     expect(outputData.c2pa).toHaveProperty('manifestCount');
+  }
+
+  /**
+   * Common test workflow for file processing
+   * @param {string} inputFile - Path to input file
+   * @param {string} expectedOutputFilename - Expected output filename (e.g., 'test.json')
+   * @param {Object} options - Test options
+   * @param {string[]} options.cliFlags - CLI flags to pass
+   * @param {string} options.expectedExtension - Expected file extension in metadata
+   * @param {string} options.expectedFileName - Expected file name in metadata
+   * @param {string} options.expectedFormat - Expected C2PA format (if applicable)
+   * @param {boolean} options.expectedC2PA - Whether to assert C2PA structure
+   * @param {boolean} options.hasTextContent - Whether to assert text content structure
+   * @param {Function} options.customAssertions - Custom assertion function(outputData, result)
+   * @param {boolean} options.useBuffer - Whether to use runCLIWithBuffer instead of runCLI
+   * @param {boolean} options.allowEmptyFile - Whether to allow file size of 0 (default: false)
+   * @returns {Object} Object containing outputData and CLI result
+   */
+  async processFileAndValidate(inputFile, expectedOutputFilename, options = {}) {
+    const {
+      cliFlags = [],
+      expectedExtension,
+      expectedFileName,
+      expectedFormat,
+      expectedC2PA: hasC2PA = false,
+      hasTextContent = false,
+      customAssertions,
+      useBuffer = false,
+      allowEmptyFile = false,
+    } = options;
+
+    const outputFile = path.join(this.testDir, expectedOutputFilename);
+
+    // Run the CLI command
+    const result = useBuffer
+      ? this.runCLIWithBuffer(inputFile, this.testDir, cliFlags)
+      : this.runCLI(inputFile, this.testDir, cliFlags);
+
+    // Check that output file was created
+    expect(await fs.pathExists(outputFile)).toBe(true);
+
+    // Read and parse the output
+    const outputData = await this.readOutputJSON(expectedOutputFilename);
+
+    // Verify basic structure
+    this.assertBasicStructure(outputData);
+
+    // Verify specific structures
+    if (hasC2PA) {
+      this.assertC2PAStructure(outputData);
+    }
+    if (hasTextContent) {
+      this.assertTextContent(outputData);
+    }
+
+    // Verify metadata if specified
+    if (expectedExtension) {
+      expect(outputData.metadata.fileExtension).toBe(expectedExtension);
+    }
+    if (expectedFileName) {
+      expect(outputData.metadata.fileName).toBe(expectedFileName);
+    }
+    if (allowEmptyFile) {
+      expect(outputData.metadata.fileSize).toBeGreaterThanOrEqual(0);
+    } else {
+      expect(outputData.metadata.fileSize).toBeGreaterThan(0);
+    }
+
+    // Verify C2PA format if specified
+    if (expectedFormat && hasC2PA) {
+      expect(outputData.c2pa.fileFormat).toBe(expectedFormat);
+
+      if (outputData.c2pa.hasManifest) {
+        expect(outputData.c2pa.manifestCount).toBeGreaterThan(0);
+
+        // Validation status should be an object with validation details
+        expect(outputData.c2pa.validationStatus).toBeDefined();
+        if (typeof outputData.c2pa.validationStatus === 'object') {
+          expect(outputData.c2pa.validationStatus).toHaveProperty('isValid');
+        }
+      }
+
+      // Check CLI output mentions C2PA
+      expect(result).toContain('C2PA:');
+    }
+
+    // Run custom assertions if provided
+    if (customAssertions && typeof customAssertions === 'function') {
+      customAssertions(outputData, result);
+    }
+
+    return { outputData, result };
+  }
+
+  /**
+   * Create a test file and process it with validation
+   * @param {string} filename - Name of the test file to create
+   * @param {string} content - Content for the test file
+   * @param {string} expectedOutputFilename - Expected output filename
+   * @param {Object} options - Test options (same as processFileAndValidate)
+   * @returns {Object} Object containing outputData and CLI result
+   */
+  async createFileAndProcess(filename, content, expectedOutputFilename, options = {}) {
+    const testFile = await this.createTestFile(filename, content);
+    return await this.processFileAndValidate(testFile, expectedOutputFilename, options);
   }
 }
 

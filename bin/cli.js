@@ -76,16 +76,17 @@ async function processFile(inputFile, outputDir, options) {
       processedAt: new Date().toISOString(),
       fileExtension: path.extname(inputPath),
     },
-    content: isTextFile ? {
-      rawContent: fileContent,
-      lineCount: fileContent.split('\n').length,
-      characterCount: fileContent.length,
-      wordCount: fileContent.trim().split(/\s+/).filter(word => word.length > 0).length,
-    } : {
-      type: 'binary',
-      size: fileStats.size,
-      note: 'Binary file content not displayed',
-    },
+    content: c2paInfo ? {} :
+      isTextFile ? {
+        rawContent: fileContent,
+        lineCount: fileContent.split('\n').length,
+        characterCount: fileContent.length,
+        wordCount: fileContent.trim().split(/\s+/).filter(word => word.length > 0).length,
+      } : {
+        type: 'binary',
+        size: fileStats.size,
+        note: 'Binary file content not displayed',
+      },
     c2pa: c2paInfo,
     processing: {
       status: 'completed',

@@ -200,8 +200,8 @@ async function processManifestStore(fileBuffer, asIndicatorSet) {
         // Gracefully handle any exceptions to make sure we get a well-formed validation result
         c2paInfo.validationStatus = {
           isValid: false,
-          error: e.message,
-          validationErrors: [],
+          error: `${e.name}`,
+          validationErrors: [e],
         };
       }
     }

@@ -14,30 +14,21 @@ describe('Basic CLI Functionality', () => {
   });
 
   test('should process a file and create JSON output', async() => {
-    const outputFile = path.join(testHelpers.testDir, 'test.json');
+    await testHelpers.processFileAndValidate(
+      testHelpers.testInputFile,
+      'test.json',
+      {
+        expectedExtension: '.txt',
+        hasTextContent: true,
+        customAssertions: (outputData, result) => {
+          expect(outputData.content.lineCount).toBeGreaterThan(0);
+          expect(outputData.content.wordCount).toBeGreaterThan(0);
 
-    // Run the CLI command
-    const result = testHelpers.runCLI(testHelpers.testInputFile);
-
-    // Check that output file was created
-    expect(await fs.pathExists(outputFile)).toBe(true);
-
-    // Read and parse the output
-    const outputData = await testHelpers.readOutputJSON('test.json');
-
-    // Verify structure using helper
-    testHelpers.assertBasicStructure(outputData);
-
-    // Verify file extension
-    expect(outputData.metadata.fileExtension).toBe('.txt');
-
-    // Verify text content
-    testHelpers.assertTextContent(outputData);
-    expect(outputData.content.lineCount).toBeGreaterThan(0);
-    expect(outputData.content.wordCount).toBeGreaterThan(0);
-
-    // Check CLI output message
-    expect(result).toContain('File processed successfully!');
+          // Check CLI output message
+          expect(result).toContain('File processed successfully!');
+        },
+      },
+    );
   });
 
   test('should create pretty printed JSON when --pretty flag is used', async() => {
