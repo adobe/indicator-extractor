@@ -50,7 +50,25 @@ function getIndicatorSet(manifestStore, validationResult) {
     if (!assertions || !assertions.assertions) return assertionsObj;
 
     for (const assertion of assertions.assertions) {
-      assertionsObj[assertion.label || 'unknown'] = {};
+      // strip out the uuid, sourceBox, componentType, content, and label properties
+      // eslint-disable-next-line no-unused-vars
+      const { uuid, sourceBox, componentType, label, content, ...rest } = assertion;
+
+      // Recursively convert any 'hash' field that is a Uint8Array to a base64 string
+      function convertHashFields(obj) {
+        if (obj && typeof obj === 'object') {
+          for (const key of Object.keys(obj)) {
+            if (key === 'hash' && obj[key] instanceof Uint8Array) {
+              obj[key] = Buffer.from(obj[key]).toString('base64');
+            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+              convertHashFields(obj[key]);
+            }
+          }
+        }
+      }
+      convertHashFields(rest);
+
+      assertionsObj[assertion.label || 'unknown'] = rest;
     }
 
     return assertionsObj;
