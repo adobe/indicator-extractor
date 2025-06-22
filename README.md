@@ -3,13 +3,13 @@
 [![Node.js CI](https://github.com/your-username/indicator-extractor/workflows/Node.js%20CI/badge.svg)](https://github.com/your-username/indicator-extractor/actions)
 [![Coverage Status](https://coveralls.io/repos/github/your-username/indicator-extractor/badge.svg?branch=main)](https://coveralls.io/github/your-username/indicator-extractor?branch=main)
 
-A Node.js CLI application that processes files and outputs structured JSON results with file metadata and content analysis.
+A Node.js command line application that processes JPEG 1 and PNG files and outputs structured JSON results - either simple information, or Trust Indicator Sets, as defined in ISO 21617-1.
 
 ## Features
 
-- 📁 **File Processing**: Process text files and extract comprehensive statistics
-- 📊 **Content Analysis**: Count lines, words, and characters
-- 🎯 **JSON Output**: Generate structured JSON with metadata and processing information
+- 📁 **File Processing**: Process files and extract useful information, including as a Trust Indicator Set
+- 📊 **Basic Content Analysis**: Provides some useful information about the file and its content
+- 🎯 **JSON Output**: Generate structured JSON in various syntaxes
 - 🎨 **Pretty Printing**: Support for both minified and pretty-printed JSON output
 - 📂 **Directory Management**: Automatically creates output directories as needed
 - ✅ **Error Handling**: Graceful error handling with informative messages
@@ -20,7 +20,7 @@ A Node.js CLI application that processes files and outputs structured JSON resul
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/indicator-extractor.git
+git clone https://gitlab.com/your-username/indicator-extractor.git
 cd indicator-extractor
 
 # Install dependencies
@@ -36,20 +36,20 @@ npm install -g .
 
 ```bash
 # Process a file with minified JSON output
-indicator-extractor input.txt ./output
+indicator-extractor input.jpg ./output
 
 # Process a file with pretty-printed JSON output
-indicator-extractor input.txt ./output --pretty
+indicator-extractor input.jpg ./output --pretty
 ```
 
 ### Using the CLI directly
 
 ```bash
 # Run from the project directory
-node bin/cli.js input.txt ./output
+node bin/cli.js input.jpg ./output
 
 # With pretty printing
-node bin/cli.js input.txt ./output --pretty
+node bin/cli.js input.jpg ./output --pretty
 ```
 
 ### Command Line Arguments
@@ -57,6 +57,7 @@ node bin/cli.js input.txt ./output --pretty
 - `<input-file>`: Path to the input file to process (required)
 - `<output-dir>`: Directory where the JSON output file will be created (required)
 - `-p, --pretty`: Pretty print the JSON output (optional)
+- `-s, --set`: Generate a Trust Indicator Set (optional, default is basic content analysis)
 
 ## Output Format
 
@@ -84,28 +85,6 @@ The CLI generates a JSON file with the following structure:
 }
 ```
 
-## Examples
-
-### Example 1: Basic File Processing
-
-```bash
-# Input file: sample.txt
-echo "Hello World!\nThis is a test file." > sample.txt
-
-# Process the file
-indicator-extractor sample.txt ./output
-
-# Output: ./output/sample.json (minified)
-```
-
-### Example 2: Pretty Printed Output
-
-```bash
-# Process with pretty printing
-indicator-extractor sample.txt ./output --pretty
-
-# Output: ./output/sample.json (formatted with indentation)
-```
 ## Development
 
 ### Scripts
@@ -137,7 +116,7 @@ The project includes comprehensive tests using Jest:
 - **Unit Tests**: Test individual utility functions
 - **Integration Tests**: Test the complete CLI workflow
 - **Error Handling Tests**: Verify graceful error handling
-- **Content Analysis Tests**: Verify accurate counting of lines, words, and characters
+- **C2PA Tests**: Verify processing of the Content Credentials & JPEG Trust Manifests
 
 ```bash
 # Run all tests
@@ -177,17 +156,23 @@ The project uses modern ESLint configuration with the following features:
 indicator-extractor/
 ├── bin/
 │   └── cli.js              # Main CLI script
+│   └── indicatorSet.js     # Create the Trust Indicator Set
+│   └── processManifest.js  # Process any C2PA/JPEG Trust Manifests
 ├── tests/
-│   ├── cli.test.js         # CLI integration tests
 │   ├── utils.test.js       # Utility function tests
+│   ├── test-helpers.js     # Utility routines for tests
+│   ├── c2pa-processing.test.js         # Tests for C2PA processing
 │   ├── setup.js            # Jest setup
-│   └── test.txt            # Sample test file
 ├── output/                 # Output directory for processed files
 ├── coverage/               # Coverage reports (generated)
+├── .github/
+│   └── copilot-instructions.md # Copilot custom instructions
+├── .gitignore              # Git ignore rules
 ├── eslint.config.js        # ESLint configuration
 ├── jest.config.js          # Jest configuration
 ├── package.json            # Project configuration
-└── README.md               # This file
+├── README.md               # This file
+└── LICENSE                 # Project license
 ```
 
 ## Configuration Files
@@ -232,60 +217,6 @@ This project is licensed under the ISC License - see the [LICENSE](LICENSE) file
 - Jest testing framework
 - Pretty printing support
 - Error handling and validation
-    "lineCount": 25,
-    "characterCount": 1234,
-    "wordCount": 200
-  },
-  "processing": {
-    "status": "completed",
-    "version": "1.0.0"
-  }
-}
-```
-
-## Development
-
-### Project Structure
-
-```
-indicator-extractor/
-├── bin/
-│   └── cli.js          # Main CLI script
-├── .github/
-│   └── copilot-instructions.md
-├── package.json
-└── README.md
-```
-
-### Running in Development
-
-```bash
-# Run directly with Node.js
-node bin/cli.js <input-file> <output-dir>
-
-# Or use npm start
-npm start <input-file> <output-dir>
-```
-
-### Testing
-
-Create a test file and run the CLI:
-
-```bash
-echo "Hello, World!" > test.txt
-node bin/cli.js test.txt ./output --pretty
-```
-
-## Requirements
-
-- Node.js 14.0 or higher
-- npm 6.0 or higher
-
-## Dependencies
-
-- **commander**: Command-line interface framework
-- **fs-extra**: Enhanced file system operations
-- **path**: Node.js path utilities
 
 ## License
 
