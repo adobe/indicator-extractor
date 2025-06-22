@@ -10,6 +10,8 @@
  * @version 1.0.0
  */
 
+import ExifReader from 'exifreader';
+
 /**
  * Generates an indicator set from a C2PA manifest store and validation result.
  *
@@ -19,26 +21,111 @@
  * - Certificate information with parsed distinguished names
  * - Validation status codes for signatures, assertions, and content
  * - Trust status information
+ * - File metadata extracted using ExifReader
  *
  * @param {ManifestStore} manifestStore - The C2PA manifest store containing one or more manifests
  * @param {ValidationResult} validationResult - Result of manifest validation containing status codes
+ * @param {Buffer} fileBuffer - The file buffer to extract metadata from
  * @returns {Object} Indicator set object with JPEG Trust context and processed manifest data
  *
  * @example
  * ```javascript
  * import { getIndicatorSet } from './indicatorSet.js';
  *
- * const indicatorSet = getIndicatorSet(manifestStore, validationResult);
+ * const indicatorSet = getIndicatorSet(manifestStore, validationResult, fileBuffer);
  * console.log(indicatorSet.manifests[0].claim.signature_status);
+ * console.log(indicatorSet.metadata);
  * ```
  */
-function generateIndicatorSet(manifestStore, validationResult) {
+function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
   const indicatorSet = {
     '@context': ['https://jpeg.org/jpegtrust'],
     manifests: [],
     content: {},
     metadata: {},
   };
+
+  /**
+   * Extracts and processes metadata from a file buffer using ExifReader.
+   *
+   * @param {Buffer} fileBuffer - The file buffer to extract metadata from
+   * @returns {Object} Processed metadata object or error information
+   *
+   * @private
+   */
+  function extractMetadata(fileBuffer) {
+    if (!fileBuffer) return {};
+    try {
+      const tags = ExifReader.load(fileBuffer);
+
+      // Process and structure the metadata
+      const processedMetadata = {};
+
+      for (const key of Object.keys(tags)) {
+        if (
+          tags[key] &&
+          typeof tags[key] === 'object' &&
+          'value' in tags[key] &&
+          tags[key].value !== ''
+        ) {
+          // Combine multi-word keys into camelCase (e.g., "image description" -> "imageDescription")
+          const camelCaseKey = key
+            .replace(/[_\s]+([a-zA-Z])/g, (_, c) => c.toUpperCase())
+            .replace(/^([A-Z])/, m => m.toLowerCase());
+          let sanitizedKey = camelCaseKey.replace(/\//g, '');
+          // If key starts with 'iCC', uppercase the starting 'i'
+          if (sanitizedKey.startsWith('iCC')) {
+            sanitizedKey = sanitizedKey.replace(/^iCC/, 'ICC');
+          }
+          if (sanitizedKey.startsWith('jFIF')) {
+            sanitizedKey = sanitizedKey.replace(/^jFIF/, 'JFIF');
+          }
+          processedMetadata[sanitizedKey] = tags[key].value;
+        }
+      }
+
+      return processedMetadata;
+    } catch (error) {
+      // If metadata extraction fails, return error information
+      return {
+        extractedAt: new Date().toISOString(),
+        source: 'exifreader',
+        error: `Failed to extract metadata: ${error.message}`,
+      };
+    }
+  }
+
+  /**
+   * Moves specific metadata keys to the content object if present.
+   *
+   * @param {Object} indicatorSet - The indicator set object containing metadata and content
+   */
+  function moveMetadataKeysToContent(indicatorSet) {
+    const keysToMove = [
+      'imageWidth',
+      'imageHeight',
+      'bitDepth',
+      'colorType',
+      'compression',
+      'filter',
+      'interlace',
+      'fileType',
+    ];
+
+    for (const key of keysToMove) {
+      if (Object.prototype.hasOwnProperty.call(indicatorSet.metadata, key)) {
+        indicatorSet.content[key] = indicatorSet.metadata[key];
+        delete indicatorSet.metadata[key];
+      }
+    }
+  }
+
+  // Extract metadata using ExifReader if fileBuffer is provided
+  indicatorSet.metadata = extractMetadata(fileBuffer);
+
+  // Move specific metadata keys to the content object if present
+  moveMetadataKeysToContent(indicatorSet);
+
 
   const valStatusCodes = validationResult.toRepresentation();
 
