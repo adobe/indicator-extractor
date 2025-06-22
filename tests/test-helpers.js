@@ -20,6 +20,7 @@ class TestHelpers {
       multipleManifests: path.join(this.testFilesDir, 'Multiple_Manifests.jpg'),
       simplePhoto: path.join(this.testFilesDir, 'SimplePhoto.jpeg'),
       standardManifest: path.join(this.testFilesDir, 's01-standard-manifest-with-actions-2ed.jpeg'),
+      trustDeclaration: path.join(this.testFilesDir, 's11-trust-declaration.jpeg'),
     };
   }
 
@@ -151,7 +152,7 @@ class TestHelpers {
   assertC2PAStructure(outputData) {
     expect(outputData).toHaveProperty('c2pa');
     expect(outputData.c2pa).toHaveProperty('fileFormat');
-    expect(outputData.c2pa).toHaveProperty('hasManifest');
+    expect(outputData.c2pa).toHaveProperty('hasManifestStore');
     expect(outputData.c2pa).toHaveProperty('manifestCount');
   }
 
@@ -169,6 +170,7 @@ class TestHelpers {
    * @param {Function} options.customAssertions - Custom assertion function(outputData, result)
    * @param {boolean} options.useBuffer - Whether to use runCLIWithBuffer instead of runCLI
    * @param {boolean} options.allowEmptyFile - Whether to allow file size of 0 (default: false)
+   * @param {boolean} options.skipManifestCountCheck - Skip the manifestCount > 0 check for hasManifestStore
    * @returns {Object} Object containing outputData and CLI result
    */
   async processFileAndValidate(inputFile, expectedOutputFilename, options = {}) {
@@ -182,6 +184,7 @@ class TestHelpers {
       customAssertions,
       useBuffer = false,
       allowEmptyFile = false,
+      skipManifestCountCheck = false,
     } = options;
 
     const outputFile = path.join(this.testDir, expectedOutputFilename);
@@ -225,7 +228,7 @@ class TestHelpers {
     if (expectedFormat && hasC2PA) {
       expect(outputData.c2pa.fileFormat).toBe(expectedFormat);
 
-      if (outputData.c2pa.hasManifest) {
+      if (outputData.c2pa.hasManifestStore && !skipManifestCountCheck) {
         expect(outputData.c2pa.manifestCount).toBeGreaterThan(0);
 
         // Validation status should be an object with validation details

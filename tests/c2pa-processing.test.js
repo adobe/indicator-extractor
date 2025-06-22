@@ -62,7 +62,7 @@ describe('C2PA Image Processing', () => {
         customAssertions: (outputData, result) => {
           // Simple photo SHOULD NOT have C2PA data
           expect(outputData.c2pa.manifestCount).toBe(0);
-          expect(outputData.c2pa.hasManifest).toBe(false);
+          expect(outputData.c2pa.hasManifestStore).toBe(false);
 
           // Check CLI output mentions C2PA
           expect(result).toContain('C2PA: No manifests found');
@@ -113,7 +113,7 @@ describe('C2PA Image Processing', () => {
     expect(typeof indicatorSetData.content).toBe('object');
 
     // If the image has C2PA manifests, verify indicator set content
-    if (outputData.c2pa.hasManifest && outputData.c2pa.manifestCount > 0) {
+    if (outputData.c2pa.hasManifestStore && outputData.c2pa.manifestCount > 0) {
       expect(indicatorSetData.manifests.length).toBeGreaterThan(0);
 
       // Verify each manifest in the indicator set has expected structure
@@ -181,6 +181,34 @@ describe('C2PA Image Processing', () => {
 
           // Check CLI output mentions validation issues
           expect(result).toContain('C2PA:');
+        },
+      },
+    );
+  });
+
+  test('should process s11-trust-declaration.jpeg and detect ManifestStore with no manifests', async() => {
+    await testHelpers.processFileAndValidate(
+      testHelpers.imageFiles.trustDeclaration,
+      's11-trust-declaration.json',
+      {
+        expectedExtension: '.jpeg',
+        expectedFileName: 's11-trust-declaration.jpeg',
+        expectedFormat: 'JPEG',
+        expectedC2PA: true,
+        skipManifestCountCheck: true,
+        customAssertions: (outputData, result) => {
+          // This file should have a ManifestStore but no manifests
+          expect(outputData.c2pa.hasManifestStore).toBe(true);
+          expect(outputData.c2pa.manifestCount).toBe(0);
+          expect(outputData.c2pa.manifests).toEqual([]);
+
+          // Validation should be false since there are no manifests to validate
+          expect(outputData.c2pa.validationStatus.isValid).toBe(false);
+
+          // Check CLI output mentions C2PA with 0 manifests
+          expect(result).toContain('C2PA:');
+          expect(result).toContain('Found 0 manifest(s)');
+          expect(result).toContain('Valid: false');
         },
       },
     );

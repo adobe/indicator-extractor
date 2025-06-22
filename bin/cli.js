@@ -125,7 +125,7 @@ async function processFile(inputFile, outputDir, options) {
       });
   }
 
-  if (c2paInfo && c2paInfo.hasManifest) {
+  if (c2paInfo && c2paInfo.hasManifestStore) {
     console.log(`🔐 C2PA: Found ${c2paInfo.manifestCount} manifest(s), Valid: ${c2paInfo.validationStatus.isValid}`);
 
     // if the --set option is used, output the indicator set

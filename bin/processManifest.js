@@ -130,7 +130,7 @@ function getIndicatorSet(manifestStore, validationResult) {
  */
 async function processManifestStore(fileBuffer, asIndicatorSet) {
   const c2paInfo = {
-    hasManifest: false,
+    hasManifestStore: false,
     manifestCount: 0,
     validationStatus: 'not_applicable',
     manifests: [],
@@ -159,7 +159,7 @@ async function processManifestStore(fileBuffer, asIndicatorSet) {
     // Try to extract manifest store
     const jumbfData = asset.getManifestJUMBF();
     if (jumbfData && jumbfData.length > 0) {
-      c2paInfo.hasManifest = true;
+      c2paInfo.hasManifestStore = true;
       c2paInfo.manifestCount = 1; // Assuming one manifest for simplicity
 
       let validationResult;
