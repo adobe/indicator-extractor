@@ -1,127 +1,8 @@
 import { BMFF, JPEG, PNG } from '@trustnxt/c2pa-ts/asset';
 import { ManifestStore } from '@trustnxt/c2pa-ts/manifest';
 import { SuperBox } from '@trustnxt/c2pa-ts/jumbf';
+import { generateIndicatorSet } from './indicatorSet.js';
 
-
-function getIndicatorSet(manifestStore, validationResult) {
-  const indicatorSet = {
-    '@context': ['https://jpeg.org/jpegtrust'],
-    manifests: [],
-    content: {},
-    metadata: {},
-  };
-
-  const valStatusCodes = validationResult.toRepresentation();
-  function getResultCodeValue(statusCodes, whichCode) {
-    const found = statusCodes.find(oneCode => oneCode.code.includes(whichCode));
-    if (!found) return null;
-
-    return found.code;
-  }
-  function getAssertionStatus(statusCodes) {
-    const codes = {};
-    for (const oneCode of statusCodes) {
-      if (oneCode.code.includes('assertion')) {
-        const urlParts = oneCode.url.split('/');
-        const lastPart = urlParts[urlParts.length - 1];
-        codes[lastPart] = oneCode.code;
-      }
-    }
-
-    return codes;
-  }
-
-  function parseDistinguishedName(dnString) {
-    if (typeof dnString !== 'string') return {};
-    return dnString.split(',')
-      .map(part => part.trim())
-      .filter(Boolean)
-      .reduce((acc, pair) => {
-        const [key, ...rest] = pair.split('=');
-        if (key && rest.length > 0) {
-          acc[key.trim()] = rest.join('=').trim();
-        }
-        return acc;
-      }, {});
-  }
-
-  function processAssertions(assertions) {
-    const assertionsObj = {};
-    if (!assertions || !assertions.assertions) return assertionsObj;
-
-    for (const assertion of assertions.assertions) {
-      // strip out the uuid, sourceBox, componentType, content, and label properties
-      // eslint-disable-next-line no-unused-vars
-      const { uuid, sourceBox, componentType, label, content, ...rest } = assertion;
-
-      // Recursively convert any 'hash' field that is a Uint8Array to a base64 string
-      function convertHashFields(obj) {
-        if (obj && typeof obj === 'object') {
-          for (const key of Object.keys(obj)) {
-            if (key === 'hash') {
-              if (obj[key] instanceof Uint8Array) {
-                obj[key] = Buffer.from(obj[key]).toString('base64');
-              } else if (Array.isArray(obj[key]) && obj[key].every(n => typeof n === 'number')) {
-                obj[key] = Buffer.from(obj[key]).toString('base64');
-              } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-                convertHashFields(obj[key]);
-              }
-            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-              convertHashFields(obj[key]);
-            }
-          }
-        }
-      }
-      convertHashFields(rest);
-
-      assertionsObj[assertion.label || 'unknown'] = rest;
-    }
-
-    return assertionsObj;
-  }
-
-  for (const manifest of manifestStore.manifests) {
-    indicatorSet.manifests.push({
-      label: manifest.label || null,
-      assertions: processAssertions(manifest.assertions),
-      claim: {
-        version: manifest.claim?.version || null,
-        title: manifest.claim?.title || null,
-        instanceID: manifest.claim?.instanceID || null,
-        claimGenerator: manifest.claim?.claimGeneratorInfo
-          ? manifest.claim.claimGeneratorInfo
-          : manifest.claim?.claimGeneratorName || null,
-        defaultAlgorithm: manifest.claim?.defaultAlgorithm || null,
-        signatureRef: manifest.claim?.signatureRef || null,
-
-        // mandatory fields
-        signature_status: getResultCodeValue(valStatusCodes, 'claimSignature.') || 'unknown',
-        assertion_status: getAssertionStatus(valStatusCodes) || 'unknown',
-        content_status: getResultCodeValue(valStatusCodes, 'assertion.dataHash') || 'unknown',
-
-        // an extra because trust is part of what we do...
-        trust_status: getResultCodeValue(valStatusCodes, 'signingCredential') || 'unknown',
-
-        // test item
-        // all_status: valStatusCodes,
-      },
-      claimSignature: {
-        algorithm: manifest.signature.signatureData?.algorithm || null,
-        certificate: {
-          serialNumber: manifest.signature.signatureData?.certificate?.serialNumber || null,
-          issuer: parseDistinguishedName(manifest.signature.signatureData?.certificate?.issuer),
-          subject: parseDistinguishedName(manifest.signature.signatureData?.certificate?.subject),
-          validity: {
-            notBefore: manifest.signature.signatureData?.certificate?.notBefore || null,
-            notAfter: manifest.signature.signatureData?.certificate?.notAfter || null,
-          },
-        },
-      },
-    });
-  }
-
-  return indicatorSet;
-}
 
 /**
  * Process C2PA manifests from a file
@@ -177,7 +58,7 @@ async function processManifestStore(fileBuffer, asIndicatorSet) {
         validationResult = await manStore.validate(asset);
 
         if ( asIndicatorSet ) {
-          c2paInfo.indicatorSet = getIndicatorSet(manStore, validationResult);
+          c2paInfo.indicatorSet = generateIndicatorSet(manStore, validationResult);
         } else {
           for (const manifest of manStore.manifests) {
             c2paInfo.manifests.push({
