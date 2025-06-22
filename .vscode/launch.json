@@ -1,0 +1,116 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Text file",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/test.txt",
+        "${workspaceFolder}/output",
+        "--pretty"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "SimplePhoto",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/SimplePhoto.jpeg",
+        "${workspaceFolder}/output",
+        "--pretty"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "ChatGPT PNG",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/ChatGPT_Image.png",
+        "${workspaceFolder}/output",
+        "--pretty"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "IS: ChatGPT PNG",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/ChatGPT_Image.png",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Multiple Manifests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/Multiple_Manifests.jpg",
+        "${workspaceFolder}/output",
+        "--pretty"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "IS: Multiple Manifests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/Multiple_Manifests.jpg",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "S01",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/s01-standard-manifest-with-actions-2ed.jpeg",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "S11",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/s11-trust-declaration.jpeg",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+  ]
+}
