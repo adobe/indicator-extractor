@@ -105,6 +105,7 @@ logs
 # Output directories (but keep structure)
 output/*.json
 !output/.gitkeep
+output/tool/*
 
 # Test temp directories
 tests/temp/
