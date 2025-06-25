@@ -210,14 +210,8 @@ This project is licensed under the ISC License - see the [LICENSE](LICENSE) file
 
 ### v1.0.0
 - Initial release
-- Basic file processing functionality
-- JSON output with metadata and content analysis
 - Comprehensive test suite
 - ESLint integration
 - Jest testing framework
 - Pretty printing support
 - Error handling and validation
-
-## License
-
-ISC
