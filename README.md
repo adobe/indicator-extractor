@@ -1,8 +1,5 @@
 # Indicator Extractor CLI
 
-[![Node.js CI](https://github.com/your-username/indicator-extractor/workflows/Node.js%20CI/badge.svg)](https://github.com/your-username/indicator-extractor/actions)
-[![Coverage Status](https://coveralls.io/repos/github/your-username/indicator-extractor/badge.svg?branch=main)](https://coveralls.io/github/your-username/indicator-extractor?branch=main)
-
 A Node.js command line application that processes JPEG 1 and PNG files and outputs structured JSON results - either simple information, or Trust Indicator Sets, as defined in ISO 21617-1.
 
 ## Features
