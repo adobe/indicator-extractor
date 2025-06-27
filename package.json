@@ -22,7 +22,7 @@
     "extractor"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "@trustnxt/c2pa-ts": "^0.8.0",
     "commander": "^14.0.0",
