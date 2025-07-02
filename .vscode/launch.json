@@ -90,7 +90,63 @@
       "request": "launch",
       "program": "${workspaceFolder}/bin/cli.js",
       "args": [
-        "${workspaceFolder}/testfiles/s01-standard-manifest-with-actions-2ed.jpeg",
+        "${workspaceFolder}/testfiles/scenario_1_v2.jpeg",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "S04",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/scenario_4_CAWGM.jpeg",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "S05",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/scenario_5_Rights.jpeg",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "S9",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/scenario_9_ProtectedAssertion.jpeg",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "S10",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/scenario_10_ProtectedManifest_v2.jpeg",
         "${workspaceFolder}/output",
         "--pretty",
         "--set"

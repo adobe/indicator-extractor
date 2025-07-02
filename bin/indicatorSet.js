@@ -262,10 +262,10 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
         version: manifest.claim?.version || null,
         title: manifest.claim?.title || null,
         instanceID: manifest.claim?.instanceID || null,
-        claimGenerator: manifest.claim?.claimGeneratorInfo
+        claim_generator: manifest.claim?.claimGeneratorInfo
           ? manifest.claim.claimGeneratorInfo
           : manifest.claim?.claimGeneratorName || null,
-        defaultAlgorithm: manifest.claim?.defaultAlgorithm || null,
+        default_algorithm: manifest.claim?.defaultAlgorithm || null,
         signatureRef: manifest.claim?.signatureRef || null,
 
         // Validation status fields - these indicate the trustworthiness of different aspects
@@ -274,15 +274,15 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
         content_status: getResultCodeValue(valStatusCodes, 'assertion.dataHash') || 'unknown',
         trust_status: getResultCodeValue(valStatusCodes, 'signingCredential') || 'unknown',
       },
-      claimSignature: {
+      claim_signature: {
         algorithm: manifest.signature.signatureData?.algorithm || null,
         certificate: {
-          serialNumber: manifest.signature.signatureData?.certificate?.serialNumber || null,
+          serial_number: manifest.signature.signatureData?.certificate?.serialNumber || null,
           issuer: parseDistinguishedName(manifest.signature.signatureData?.certificate?.issuer),
           subject: parseDistinguishedName(manifest.signature.signatureData?.certificate?.subject),
           validity: {
-            notBefore: manifest.signature.signatureData?.certificate?.notBefore || null,
-            notAfter: manifest.signature.signatureData?.certificate?.notAfter || null,
+            not_before: manifest.signature.signatureData?.certificate?.notBefore || null,
+            not_after: manifest.signature.signatureData?.certificate?.notAfter || null,
           },
         },
       },
