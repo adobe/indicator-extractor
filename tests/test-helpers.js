@@ -19,7 +19,11 @@ class TestHelpers {
       chatgptImage: path.join(this.testFilesDir, 'ChatGPT_Image.png'),
       multipleManifests: path.join(this.testFilesDir, 'Multiple_Manifests.jpg'),
       simplePhoto: path.join(this.testFilesDir, 'SimplePhoto.jpeg'),
-      standardManifest: path.join(this.testFilesDir, 's01-standard-manifest-with-actions-2ed.jpeg'),
+      standardManifest: path.join(this.testFilesDir, 'scenario_1_v2.jpeg'),
+      cawgMetadata: path.join(this.testFilesDir, 'scenario_4_CAWGM.jpeg'),
+      rightsAssertion: path.join(this.testFilesDir, 'scenario_5_Rights.jpeg'),
+      protectedAssertion: path.join(this.testFilesDir, 'scenario_9_ProtectedAssertion.jpeg'),
+      protectedManifest: path.join(this.testFilesDir, 'scenario_10_ProtectedManifest.jpeg'),
       trustDeclaration: path.join(this.testFilesDir, 's11-trust-declaration.jpeg'),
     };
   }
@@ -262,6 +266,95 @@ class TestHelpers {
     const testFile = await this.createTestFile(filename, content);
     return await this.processFileAndValidate(testFile, expectedOutputFilename, options);
   }
+
+  async assertIndicatorSetStructure(indicatorSetFile, outputData) {
+    const indicatorSetData = await this.readOutputJSON(indicatorSetFile);
+
+    // Verify indicator set structure
+    // check for the required properties
+    expect(indicatorSetData).toHaveProperty('@context');
+    expect(typeof indicatorSetData['@context']).toBe('object');
+    expect(indicatorSetData).toHaveProperty('manifests');
+    expect(Array.isArray(indicatorSetData.manifests)).toBe(true);
+    expect(indicatorSetData).toHaveProperty('content');
+    expect(typeof indicatorSetData.content).toBe('object');
+
+    // If the image has C2PA manifests, verify indicator set content
+    if (outputData.c2pa.hasManifestStore && outputData.c2pa.manifestCount > 0) {
+      expect(indicatorSetData.manifests.length).toBeGreaterThan(0);
+
+      // Verify each manifest in the indicator set has expected structure
+      indicatorSetData.manifests.forEach(manifest => {
+        expect(manifest).toHaveProperty('label');
+        expect(manifest).toHaveProperty('created_assertions');
+        expect(manifest).toHaveProperty('generated_assertions');
+        expect(manifest).toHaveProperty('redacted_assertions');
+        expect(manifest).toHaveProperty('claim');
+        expect(manifest).toHaveProperty('claim_signature');
+
+        //   // Verify claim structure
+        //   expect(manifest.claim).toHaveProperty('version');
+        //   expect(manifest.claim).toHaveProperty('title');
+        //   expect(manifest.claim).toHaveProperty('instanceID');
+        //   expect(manifest.claim).toHaveProperty('claimGenerator');
+        //   expect(manifest.claim).toHaveProperty('defaultAlgorithm');
+        //   expect(manifest.claim).toHaveProperty('signatureRef');
+
+        //   // Verify signature structure
+        //   expect(manifest.signature).toHaveProperty('algorithm');
+        //   expect(manifest.signature).toHaveProperty('certificate');
+        //   expect(manifest.signature.certificate).toHaveProperty('issuer');
+        //   expect(manifest.signature.certificate).toHaveProperty('subject');
+        //   expect(manifest.signature.certificate).toHaveProperty('serialNumber');
+        //   expect(manifest.signature.certificate).toHaveProperty('notBefore');
+        //   expect(manifest.signature.certificate).toHaveProperty('notAfter');
+
+      //   // Verify assertions structure
+      //   expect(Array.isArray(manifest.assertions)).toBe(true);
+      //   manifest.assertions.forEach(assertion => {
+      //     expect(assertion).toHaveProperty('label');
+      //   });
+      });
+    }
+  }
+
+  /**
+   * Processes a file using the CLI with the `--set` flag, validates the output file and indicator set file,
+   * and asserts their structures and contents.
+   *
+   * @async
+   * @param {string} outputFileName - The name of the output file to validate.
+   * @param {string} indicatorFileName - The name of the indicator set file to validate.
+   * @param {Object} [options={}] - Optional parameters for processing.
+   * @returns {Promise<void>} Resolves when validation is complete.
+   */
+  // eslint-disable-next-line no-unused-vars
+  async processFileAndValidateWithIndicatorSet(inputImage, outputFileName, indicatorFileName, options = {}) {
+    const outputFile = path.join(this.testDir, outputFileName);
+    const indicatorSetFile = path.join(this.testDir, indicatorFileName);
+
+    // Run the CLI command with --set flag
+    const result = this.runCLI(inputImage, this.testDir, ['--set']);
+
+    // Check that both output files were created
+    expect(await fs.pathExists(outputFile)).toBe(true);
+    expect(await fs.pathExists(indicatorSetFile)).toBe(true);
+
+    // Read and parse the main output
+    const outputData = await this.readOutputJSON(outputFileName);
+
+    // Verify basic structure
+    this.assertBasicStructure(outputData);
+    this.assertC2PAStructure(outputData);
+
+    // Read and parse the indicator set output
+    this.assertIndicatorSetStructure(indicatorFileName, outputData);
+
+    // Check CLI output mentions Trust Indicator Set
+    expect(result).toContain('Trust Indicator Set:');
+    expect(result).toContain(indicatorFileName);
+  }
+
 }
 
 module.exports = TestHelpers;

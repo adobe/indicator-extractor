@@ -257,7 +257,9 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
   for (const manifest of manifestStore.manifests) {
     indicatorSet.manifests.push({
       label: manifest.label || null,
-      assertions: processAssertions(manifest.assertions),
+      created_assertions: processAssertions(manifest.assertions),
+      generated_assertions: processAssertions(manifest.generatedAssertions),
+      redacted_assertions: processAssertions(manifest.redactedAssertions),
       claim: {
         version: manifest.claim?.version || null,
         title: manifest.claim?.title || null,
