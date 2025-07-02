@@ -1,7 +1,0 @@
-node_modules/
-coverage/
-output/
-*.log
-.nyc_output/
-dist/
-build/

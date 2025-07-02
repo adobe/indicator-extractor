@@ -29,7 +29,7 @@ program
   .argument('<output-dir>', 'output directory for the JSON file')
   .option('-p, --pretty', 'pretty print JSON output', false)
   .option('-s, --set', 'output JPEG Trust Indicator Set grammar', false)
-  .action(async (inputFile, outputDir, options) => {
+  .action(async(inputFile, outputDir, options) => {
     try {
       await processFile(inputFile, outputDir, options);
     } catch (error) {

@@ -12,6 +12,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "eslint": "eslint bin/ tests/",
     "lint": "eslint bin/ tests/",
     "lint:fix": "eslint bin/ tests/ --fix"
   },
