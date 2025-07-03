@@ -118,8 +118,15 @@ async function processManifestStore(fileBuffer, asIndicatorSet) {
         c2paInfo.validationStatus = {
           isValid: false,
           error: `${e.name}`,
-          validationErrors: [e],
+          code: e.code || null,
+          explanation: e.explanation || null,
+          uri: e.uri.uri || null,
         };
+
+        if (asIndicatorSet) {
+          c2paInfo.indicatorSet = generateIndicatorSet(null, null, fileBuffer);
+          c2paInfo.indicatorSet.validation_status = c2paInfo.validationStatus;
+        }
       }
     }
   } catch (error) {
