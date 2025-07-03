@@ -20,8 +20,10 @@ class TestHelpers {
       multipleManifests: path.join(this.testFilesDir, 'Multiple_Manifests.jpg'),
       simplePhoto: path.join(this.testFilesDir, 'SimplePhoto.jpeg'),
       standardManifest: path.join(this.testFilesDir, 'scenario_1_v2.jpeg'),
+      extMods: path.join(this.testFilesDir, 'scenario_2_ExtMods.jpeg'),
       cawgMetadata: path.join(this.testFilesDir, 'scenario_4_CAWGM.jpeg'),
       rightsAssertion: path.join(this.testFilesDir, 'scenario_5_Rights.jpeg'),
+      softBinding: path.join(this.testFilesDir, 'scenario_6_SoftBinding.jpeg'),
       protectedAssertion: path.join(this.testFilesDir, 'scenario_9_ProtectedAssertion.jpeg'),
       protectedManifest: path.join(this.testFilesDir, 'scenario_10_ProtectedManifest.jpeg'),
       trustDeclaration: path.join(this.testFilesDir, 's11-trust-declaration.jpeg'),
@@ -278,6 +280,14 @@ class TestHelpers {
     expect(Array.isArray(indicatorSetData.manifests)).toBe(true);
     expect(indicatorSetData).toHaveProperty('content');
     expect(typeof indicatorSetData.content).toBe('object');
+
+    // check for asset_info
+    expect(indicatorSetData).toHaveProperty('asset_info');
+    expect(typeof indicatorSetData.asset_info).toBe('object');
+    expect(indicatorSetData.asset_info).toHaveProperty('alg');
+    expect(indicatorSetData.asset_info).toHaveProperty('hash');
+    expect(indicatorSetData.asset_info.alg).toBe('sha256');
+
 
     // If the image has C2PA manifests, verify indicator set content
     if (outputData.c2pa.hasManifestStore && outputData.c2pa.manifestCount > 0) {

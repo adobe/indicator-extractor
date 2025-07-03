@@ -11,6 +11,7 @@ governing permissions and limitations under the License.
 */
 
 import ExifReader from 'exifreader';
+import { createHash } from 'crypto';
 
 /**
  * Extracts and processes metadata from a file buffer using ExifReader.
@@ -274,10 +275,21 @@ function processHashedURIs(hashedURIs) {
 function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
   const indicatorSet = {
     '@context': ['https://jpeg.org/jpegtrust'],
+    asset_info:{},
     manifests: [],
     content: {},
     metadata: {},
   };
+
+  // If fileBuffer is provided, extract file information
+  if (fileBuffer) {
+    const fHash = createHash('sha256').update(fileBuffer).digest('base64');
+    indicatorSet.asset_info = {
+      alg: 'sha256', // Default algorithm, can be overridden if needed
+      hash: fHash,
+      // url: null, // we don't add this due to privacy concerns
+    };
+  }
 
   // Extract metadata using ExifReader if fileBuffer is provided
   indicatorSet.metadata = extractMetadata(fileBuffer);

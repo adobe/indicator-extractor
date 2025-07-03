@@ -99,6 +99,15 @@ describe('C2PA Image Processing', () => {
     await testHelpers.processFileAndValidateWithIndicatorSet(inputFile, outputFileName, indicatorName);
   });
 
+  test('should process Scenario 2 (extent of mods)', async() => {
+    const inputFile = testHelpers.imageFiles.extMods;
+    const inputFileName = path.basename(inputFile, path.extname(inputFile));
+    const outputFileName = `${inputFileName}.json`;
+    const indicatorName = `${inputFileName}-indicators.json`;
+
+    await testHelpers.processFileAndValidateWithIndicatorSet(inputFile, outputFileName, indicatorName);
+  });
+
   test('should process Scenario 4 (CAWG Metadata)', async() => {
     const inputFile = testHelpers.imageFiles.cawgMetadata;
     const inputFileName = path.basename(inputFile, path.extname(inputFile));
@@ -110,6 +119,15 @@ describe('C2PA Image Processing', () => {
 
   test('should process Scenario 5 (rights assertion)', async() => {
     const inputFile = testHelpers.imageFiles.rightsAssertion;
+    const inputFileName = path.basename(inputFile, path.extname(inputFile));
+    const outputFileName = `${inputFileName}.json`;
+    const indicatorName = `${inputFileName}-indicators.json`;
+
+    await testHelpers.processFileAndValidateWithIndicatorSet(inputFile, outputFileName, indicatorName);
+  });
+
+  test('should process Scenario 6 (soft binding)', async() => {
+    const inputFile = testHelpers.imageFiles.softBinding;
     const inputFileName = path.basename(inputFile, path.extname(inputFile));
     const outputFileName = `${inputFileName}.json`;
     const indicatorName = `${inputFileName}-indicators.json`;

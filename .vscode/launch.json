@@ -99,6 +99,20 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
+      "name": "S02",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/scenario_2_ExtMods.jpeg",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
       "name": "S04",
       "type": "node",
       "request": "launch",
@@ -119,6 +133,20 @@
       "program": "${workspaceFolder}/bin/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_5_Rights.jpeg",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "S06",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/scenario_6_SoftBinding.jpeg",
         "${workspaceFolder}/output",
         "--pretty",
         "--set"
