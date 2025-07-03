@@ -263,18 +263,13 @@ function processHashedURIs(hashedURIs) {
  * @param {Buffer} fileBuffer - The file buffer to extract metadata from
  * @returns {Object} Indicator set object with JPEG Trust context and processed manifest data
  *
- * @example
- * ```javascript
- * import { getIndicatorSet } from './indicatorSet.js';
- *
- * const indicatorSet = getIndicatorSet(manifestStore, validationResult, fileBuffer);
- * console.log(indicatorSet.manifests[0].claim.signature_status);
- * console.log(indicatorSet.metadata);
- * ```
  */
 function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
   const indicatorSet = {
-    '@context': ['https://jpeg.org/jpegtrust'],
+    '@context': {
+      '@vocab': 'https://jpeg.org/jpegtrust',
+      'extras': 'https://jpeg.org/jpegtrust/extras',
+    },
     asset_info:{},
     manifests: [],
     content: {},
@@ -345,7 +340,7 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
 
   // add the validation status to the indicator set (if validationResult is provided)
   if ( validationResult ) {
-    indicatorSet.validation_status = {
+    indicatorSet['extras:validation_status'] = {
       isValid: validationResult.isValid || false,
       error: validationResult.error || null,
       validationErrors: Array.isArray(validationResult.validationErrors)
