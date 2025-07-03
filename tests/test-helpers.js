@@ -293,7 +293,6 @@ class TestHelpers {
 
         // Verify claim structure
         const claim = manifest['claim.v2'];
-        expect(claim).toHaveProperty('version');
         expect(claim).toHaveProperty('dc:title');
         expect(claim).toHaveProperty('instanceID');
         expect(claim).toHaveProperty('claim_generator');
@@ -303,14 +302,16 @@ class TestHelpers {
         expect(claim).toHaveProperty('gathered_assertions');
         expect(claim).toHaveProperty('redacted_assertions');
 
-        //   // Verify signature structure
-        //   expect(manifest.signature).toHaveProperty('algorithm');
-        //   expect(manifest.signature).toHaveProperty('certificate');
-        //   expect(manifest.signature.certificate).toHaveProperty('issuer');
-        //   expect(manifest.signature.certificate).toHaveProperty('subject');
-        //   expect(manifest.signature.certificate).toHaveProperty('serialNumber');
-        //   expect(manifest.signature.certificate).toHaveProperty('notBefore');
-        //   expect(manifest.signature.certificate).toHaveProperty('notAfter');
+        // Verify signature structure
+        const signature = manifest.claim_signature;
+        expect(signature).toHaveProperty('algorithm');
+        expect(signature).toHaveProperty('certificate');
+        expect(signature.certificate).toHaveProperty('issuer');
+        expect(signature.certificate).toHaveProperty('subject');
+        expect(signature.certificate).toHaveProperty('serial_number');
+        expect(signature.certificate).toHaveProperty('validity');
+        expect(signature.certificate.validity).toHaveProperty('not_before');
+        expect(signature.certificate.validity).toHaveProperty('not_after');
 
       //   // Verify assertions structure
       //   expect(Array.isArray(manifest.assertions)).toBe(true);

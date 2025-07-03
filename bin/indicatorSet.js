@@ -292,7 +292,6 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
       label: manifest.label || null,
       assertions: processAssertions(manifest.assertions),
       [manifest.claim?.version === 1 ? 'claim.v2' : 'claim']: {
-        version: manifest.claim?.version || null,
         'dc:title': manifest.claim?.title || null,
         instanceID: manifest.claim?.instanceID || null,
         claim_generator: manifest.claim?.claimGeneratorInfo
