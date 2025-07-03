@@ -199,6 +199,32 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
   }
 
   /**
+   * Recursively converts Uint8Array hash fields to base64 strings.
+   * This makes the data JSON-serializable and human-readable.
+   *
+   * @param {Object} obj - Object to process for hash field conversion
+   *
+   * @private
+   */
+  function convertHashFields(obj) {
+    if (obj && typeof obj === 'object') {
+      for (const key of Object.keys(obj)) {
+        if (key === 'hash') {
+          if (obj[key] instanceof Uint8Array) {
+            obj[key] = Buffer.from(obj[key]).toString('base64');
+          } else if (Array.isArray(obj[key]) && obj[key].every(n => typeof n === 'number')) {
+            obj[key] = Buffer.from(obj[key]).toString('base64');
+          } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+            convertHashFields(obj[key]);
+          }
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          convertHashFields(obj[key]);
+        }
+      }
+    }
+  }
+
+  /**
    * Processes C2PA assertions and converts them to a structured format.
    *
    * This function:
@@ -220,31 +246,6 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
       // eslint-disable-next-line no-unused-vars
       const { uuid, sourceBox, componentType, label, content, ...rest } = assertion;
 
-      /**
-       * Recursively converts Uint8Array hash fields to base64 strings.
-       * This makes the data JSON-serializable and human-readable.
-       *
-       * @param {Object} obj - Object to process for hash field conversion
-       *
-       * @private
-       */
-      function convertHashFields(obj) {
-        if (obj && typeof obj === 'object') {
-          for (const key of Object.keys(obj)) {
-            if (key === 'hash') {
-              if (obj[key] instanceof Uint8Array) {
-                obj[key] = Buffer.from(obj[key]).toString('base64');
-              } else if (Array.isArray(obj[key]) && obj[key].every(n => typeof n === 'number')) {
-                obj[key] = Buffer.from(obj[key]).toString('base64');
-              } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-                convertHashFields(obj[key]);
-              }
-            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-              convertHashFields(obj[key]);
-            }
-          }
-        }
-      }
       convertHashFields(rest);
 
       assertionsObj[assertion.label || 'unknown'] = rest;
@@ -253,28 +254,55 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
     return assertionsObj;
   }
 
+  /**
+   * Produces a JSON object for a HashedURI.
+   *
+   * A HashedURI typically contains a URI, a hash (Uint8Array or Buffer), and the algorithm
+   * This function returns a JSON-serializable object with the URI and the hash as a base64 string.
+   *
+   * @param {Object} hashedURI - The HashedURI object with 'uri' and 'hash' fields
+   * @returns {Object} JSON object with 'uri' and 'hash' (base64)
+   */
+  function hashedURIToJSON(hashedURI) {
+    if (!hashedURI || typeof hashedURI !== 'object') return {};
+    const { uri, hash, alg } = hashedURI;
+    let hashBase64 = null;
+    if (hash instanceof Uint8Array || Buffer.isBuffer(hash)) {
+      hashBase64 = Buffer.from(hash).toString('base64');
+    } else if (Array.isArray(hash) && hash.every(n => typeof n === 'number')) {
+      hashBase64 = Buffer.from(hash).toString('base64');
+    }
+    const result = {
+      url: uri || null,
+      hash: hashBase64,
+    };
+    if (alg !== null) result.alg = alg;
+
+    return result;
+  }
+
+  function processHashedURIs(hashedURIs) {
+    if (!hashedURIs || !Array.isArray(hashedURIs)) return [];
+    return hashedURIs.map(hashedURI => hashedURIToJSON(hashedURI));
+  }
+
   // Process each manifest in the store
   for (const manifest of manifestStore.manifests) {
     indicatorSet.manifests.push({
       label: manifest.label || null,
-      created_assertions: processAssertions(manifest.assertions),
-      generated_assertions: processAssertions(manifest.generatedAssertions),
-      redacted_assertions: processAssertions(manifest.redactedAssertions),
-      claim: {
+      assertions: processAssertions(manifest.assertions),
+      [manifest.claim?.version === 1 ? 'claim.v2' : 'claim']: {
         version: manifest.claim?.version || null,
-        title: manifest.claim?.title || null,
+        'dc:title': manifest.claim?.title || null,
         instanceID: manifest.claim?.instanceID || null,
         claim_generator: manifest.claim?.claimGeneratorInfo
           ? manifest.claim.claimGeneratorInfo
           : manifest.claim?.claimGeneratorName || null,
-        default_algorithm: manifest.claim?.defaultAlgorithm || null,
-        signatureRef: manifest.claim?.signatureRef || null,
-
-        // Validation status fields - these indicate the trustworthiness of different aspects
-        signature_status: getResultCodeValue(valStatusCodes, 'claimSignature.') || 'unknown',
-        assertion_status: getAssertionStatus(valStatusCodes) || 'unknown',
-        content_status: getResultCodeValue(valStatusCodes, 'assertion.dataHash') || 'unknown',
-        trust_status: getResultCodeValue(valStatusCodes, 'signingCredential') || 'unknown',
+        alg: manifest.claim?.defaultAlgorithm || null,
+        signature: manifest.claim?.signatureRef || null,
+        created_assertions: processHashedURIs(manifest.claim?.assertions),
+        gathered_assertions: processHashedURIs(manifest.claim?.gatheredAssertions),
+        redacted_assertions: processHashedURIs(manifest.claim?.redactedAssertions),
       },
       claim_signature: {
         algorithm: manifest.signature.signatureData?.algorithm || null,
@@ -288,8 +316,30 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
           },
         },
       },
+      // Validation status fields - these indicate the trustworthiness of different aspects
+      status: {
+        signature: getResultCodeValue(valStatusCodes, 'claimSignature.') || 'unknown',
+        assertion: getAssertionStatus(valStatusCodes) || 'unknown',
+        content: getResultCodeValue(valStatusCodes, 'assertion.dataHash') || 'unknown',
+        trust: getResultCodeValue(valStatusCodes, 'signingCredential') || '',
+      },
     });
   }
+
+  // add the validation status to the indicator set
+  indicatorSet.validation_status = {
+    isValid: validationResult.isValid || false,
+    error: validationResult.error || null,
+    validationErrors: Array.isArray(validationResult.validationErrors)
+      ? validationResult.validationErrors.map(err => err.toString())
+      : [],
+    entries: validationResult.statusEntries.map(entry => ({
+      code: entry.code,
+      message: entry.message,
+      url: entry.url || null,
+      severity: entry.severity || 'info',
+    })),
+  };
 
   return indicatorSet;
 }

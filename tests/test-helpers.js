@@ -286,19 +286,22 @@ class TestHelpers {
       // Verify each manifest in the indicator set has expected structure
       indicatorSetData.manifests.forEach(manifest => {
         expect(manifest).toHaveProperty('label');
-        expect(manifest).toHaveProperty('created_assertions');
-        expect(manifest).toHaveProperty('generated_assertions');
-        expect(manifest).toHaveProperty('redacted_assertions');
-        expect(manifest).toHaveProperty('claim');
+        expect(manifest).toHaveProperty('assertions');
+        expect(manifest).toHaveProperty(['claim.v2']);
         expect(manifest).toHaveProperty('claim_signature');
+        expect(manifest).toHaveProperty('status');
 
-        //   // Verify claim structure
-        //   expect(manifest.claim).toHaveProperty('version');
-        //   expect(manifest.claim).toHaveProperty('title');
-        //   expect(manifest.claim).toHaveProperty('instanceID');
-        //   expect(manifest.claim).toHaveProperty('claimGenerator');
-        //   expect(manifest.claim).toHaveProperty('defaultAlgorithm');
-        //   expect(manifest.claim).toHaveProperty('signatureRef');
+        // Verify claim structure
+        const claim = manifest['claim.v2'];
+        expect(claim).toHaveProperty('version');
+        expect(claim).toHaveProperty('dc:title');
+        expect(claim).toHaveProperty('instanceID');
+        expect(claim).toHaveProperty('claim_generator');
+        expect(claim).toHaveProperty('alg');
+        expect(claim).toHaveProperty('signature');
+        expect(claim).toHaveProperty('created_assertions');
+        expect(claim).toHaveProperty('gathered_assertions');
+        expect(claim).toHaveProperty('redacted_assertions');
 
         //   // Verify signature structure
         //   expect(manifest.signature).toHaveProperty('algorithm');
