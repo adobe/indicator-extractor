@@ -85,6 +85,20 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
+      "name": "IS: HEIF",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/sample-out.heif",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
       "name": "S01",
       "type": "node",
       "request": "launch",

@@ -245,7 +245,26 @@ function processHashedURIs(hashedURIs) {
   return hashedURIs.map(hashedURI => hashedURIToJSON(hashedURI));
 }
 
-
+function getSignatureAlgoName(algorithm) {
+  switch (algorithm.coseIdentifier) {
+  case -7:
+    return 'ES256';
+  case -35:
+    return 'ES384';
+  case -36:
+    return 'ES512';
+  case -37:
+    return 'PS256';
+  case -38:
+    return 'PS384';
+  case -39:
+    return 'PS512';
+  case -8:
+    return 'Ed25519';
+  default:
+    return 'Unknown';
+  }
+}
 
 /**
  * Generates an indicator set from a C2PA manifest store and validation result.
@@ -316,22 +335,20 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
           redacted_assertions: processHashedURIs(manifest.claim?.redactedAssertions),
         },
         claim_signature: {
-          algorithm: manifest.signature.signatureData?.algorithm || null,
-          certificate: {
-            serial_number: manifest.signature.signatureData?.certificate?.serialNumber || null,
-            issuer: parseDistinguishedName(manifest.signature.signatureData?.certificate?.issuer),
-            subject: parseDistinguishedName(manifest.signature.signatureData?.certificate?.subject),
-            validity: {
-              not_before: manifest.signature.signatureData?.certificate?.notBefore || null,
-              not_after: manifest.signature.signatureData?.certificate?.notAfter || null,
-            },
+          algorithm: getSignatureAlgoName(manifest.signature.signatureData?.algorithm) || null,
+          serial_number: manifest.signature.signatureData?.certificate?.serialNumber || null,
+          issuer: parseDistinguishedName(manifest.signature.signatureData?.certificate?.issuer),
+          subject: parseDistinguishedName(manifest.signature.signatureData?.certificate?.subject),
+          validity: {
+            not_before: manifest.signature.signatureData?.certificate?.notBefore || null,
+            not_after: manifest.signature.signatureData?.certificate?.notAfter || null,
           },
         },
         // Validation status fields - these indicate the trustworthiness of different aspects
         status: {
           signature: getResultCodeValue(valStatusCodes, 'claimSignature.') || 'unknown',
           assertion: getAssertionStatus(valStatusCodes) || 'unknown',
-          content: getResultCodeValue(valStatusCodes, 'assertion.dataHash') || 'unknown',
+          content: getResultCodeValue(valStatusCodes, 'assertion.dataHash') || getResultCodeValue(valStatusCodes, 'assertion.hash.bmff') || 'unknown',
           trust: getResultCodeValue(valStatusCodes, 'signingCredential') || '',
         },
       });
