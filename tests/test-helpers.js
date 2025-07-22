@@ -315,13 +315,12 @@ class TestHelpers {
         // Verify signature structure
         const signature = manifest.claim_signature;
         expect(signature).toHaveProperty('algorithm');
-        expect(signature).toHaveProperty('certificate');
-        expect(signature.certificate).toHaveProperty('issuer');
-        expect(signature.certificate).toHaveProperty('subject');
-        expect(signature.certificate).toHaveProperty('serial_number');
-        expect(signature.certificate).toHaveProperty('validity');
-        expect(signature.certificate.validity).toHaveProperty('not_before');
-        expect(signature.certificate.validity).toHaveProperty('not_after');
+        expect(signature).toHaveProperty('issuer');
+        expect(signature).toHaveProperty('subject');
+        expect(signature).toHaveProperty('serial_number');
+        expect(signature).toHaveProperty('validity');
+        expect(signature.validity).toHaveProperty('not_before');
+        expect(signature.validity).toHaveProperty('not_after');
 
       //   // Verify assertions structure
       //   expect(Array.isArray(manifest.assertions)).toBe(true);
