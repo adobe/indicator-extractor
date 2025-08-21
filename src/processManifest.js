@@ -70,7 +70,7 @@ async function processManifestStore(fileBuffer, asIndicatorSet) {
         validationResult = await manStore.validate(asset);
 
         if (asIndicatorSet) {
-          c2paInfo.indicatorSet = generateIndicatorSet(manStore, validationResult, fileBuffer);
+          c2paInfo.indicatorSet = await generateIndicatorSet(manStore, validationResult, fileBuffer);
         } else {
           for (const manifest of manStore.manifests) {
             c2paInfo.manifests.push({
@@ -124,7 +124,7 @@ async function processManifestStore(fileBuffer, asIndicatorSet) {
         };
 
         if (asIndicatorSet) {
-          c2paInfo.indicatorSet = generateIndicatorSet(null, null, fileBuffer);
+          c2paInfo.indicatorSet = await generateIndicatorSet(null, null, fileBuffer);
           c2paInfo.indicatorSet.validation_status = c2paInfo.validationStatus;
         }
       }

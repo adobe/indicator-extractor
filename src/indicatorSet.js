@@ -10,31 +10,30 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import ExifReader from 'exifreader';
+import exifr from 'exifr';
 import { createHash } from 'crypto';
 
 /**
- * Extracts and processes metadata from a file buffer using ExifReader.
+ * Extracts and processes metadata from a file buffer using exifr.
  *
  * @param {Buffer} fileBuffer - The file buffer to extract metadata from
  * @returns {Object} Processed metadata object or error information
  *
  * @private
  */
-function extractMetadata(fileBuffer) {
+async function extractMetadata(fileBuffer) {
   if (!fileBuffer) return {};
   try {
-    const tags = ExifReader.load(fileBuffer);
+    const tags = await exifr.parse(fileBuffer);
 
     // Process and structure the metadata
     const processedMetadata = {};
 
     for (const key of Object.keys(tags)) {
       if (
-        tags[key] &&
-        typeof tags[key] === 'object' &&
-        'value' in tags[key] &&
-        tags[key].value !== ''
+        tags[key] !== null &&
+        tags[key] !== undefined &&
+        tags[key] !== ''
       ) {
         // Combine multi-word keys into camelCase (e.g., "image description" -> "imageDescription")
         const camelCaseKey = key
@@ -48,7 +47,7 @@ function extractMetadata(fileBuffer) {
         if (sanitizedKey.startsWith('jFIF')) {
           sanitizedKey = sanitizedKey.replace(/^jFIF/, 'JFIF');
         }
-        processedMetadata[sanitizedKey] = tags[key].value;
+        processedMetadata[sanitizedKey] = tags[key];
       }
     }
 
@@ -57,7 +56,7 @@ function extractMetadata(fileBuffer) {
     // If metadata extraction fails, return error information
     return {
       extractedAt: new Date().toISOString(),
-      source: 'exifreader',
+      source: 'exifr',
       error: `Failed to extract metadata: ${error.message}`,
     };
   }
@@ -247,22 +246,22 @@ function processHashedURIs(hashedURIs) {
 
 function getSignatureAlgoName(algorithm) {
   switch (algorithm.coseIdentifier) {
-  case -7:
-    return 'ES256';
-  case -35:
-    return 'ES384';
-  case -36:
-    return 'ES512';
-  case -37:
-    return 'PS256';
-  case -38:
-    return 'PS384';
-  case -39:
-    return 'PS512';
-  case -8:
-    return 'Ed25519';
-  default:
-    return 'Unknown';
+    case -7:
+      return 'ES256';
+    case -35:
+      return 'ES384';
+    case -36:
+      return 'ES512';
+    case -37:
+      return 'PS256';
+    case -38:
+      return 'PS384';
+    case -39:
+      return 'PS512';
+    case -8:
+      return 'Ed25519';
+    default:
+      return 'Unknown';
   }
 }
 
@@ -275,7 +274,7 @@ function getSignatureAlgoName(algorithm) {
  * - Certificate information with parsed distinguished names
  * - Validation status codes for signatures, assertions, and content
  * - Trust status information
- * - File metadata extracted using ExifReader
+ * - File metadata extracted using exifr
  *
  * @param {ManifestStore} manifestStore - The C2PA manifest store containing one or more manifests
  * @param {ValidationResult} validationResult - Result of manifest validation containing status codes
@@ -283,13 +282,13 @@ function getSignatureAlgoName(algorithm) {
  * @returns {Object} Indicator set object with JPEG Trust context and processed manifest data
  *
  */
-function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
+async function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
   const indicatorSet = {
     '@context': {
       '@vocab': 'https://jpeg.org/jpegtrust',
       'extras': 'https://jpeg.org/jpegtrust/extras',
     },
-    asset_info:{},
+    asset_info: {},
     manifests: [],
     content: {},
     metadata: {},
@@ -305,8 +304,8 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
     };
   }
 
-  // Extract metadata using ExifReader if fileBuffer is provided
-  indicatorSet.metadata = extractMetadata(fileBuffer);
+  // Extract metadata using exifr if fileBuffer is provided
+  indicatorSet.metadata = await extractMetadata(fileBuffer);
 
   // Move specific metadata keys to the content object if present
   moveMetadataKeysToContent(indicatorSet);
@@ -314,7 +313,7 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
   // make sure we have a valid manifest store
   // we might get called when there was error parsing the manifest
   // in which case manifestStore will be null
-  if ( manifestStore ) {
+  if (manifestStore) {
     const valStatusCodes = validationResult.toRepresentation();
 
     // Process each manifest in the store
@@ -356,7 +355,7 @@ function generateIndicatorSet(manifestStore, validationResult, fileBuffer) {
   }
 
   // add the validation status to the indicator set (if validationResult is provided)
-  if ( validationResult ) {
+  if (validationResult) {
     indicatorSet['extras:validation_status'] = {
       isValid: validationResult.isValid || false,
       error: validationResult.error || null,
