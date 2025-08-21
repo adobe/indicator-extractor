@@ -3,18 +3,18 @@
   "version": "1.0.0",
   "type": "module",
   "description": "CLI tool to process files and output JSON results",
-  "main": "bin/cli.js",
+  "main": "src/cli.js",
   "bin": {
-    "indicator-extractor": "./bin/cli.js"
+    "indicator-extractor": "./src/cli.js"
   },
   "scripts": {
-    "start": "node bin/cli.js",
+    "start": "node src/cli.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "eslint": "eslint bin/ tests/",
-    "lint": "eslint bin/ tests/",
-    "lint:fix": "eslint bin/ tests/ --fix"
+    "eslint": "eslint src/ tests/",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix"
   },
   "keywords": [
     "cli",

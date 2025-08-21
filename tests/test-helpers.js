@@ -9,7 +9,7 @@ class TestHelpers {
   constructor(suiteName = 'default') {
     this.testDir = path.join(__dirname, 'temp', suiteName);
     this.testFilesDir = path.join(__dirname, '..', 'testfiles');
-    this.cliPath = path.join(__dirname, '..', 'bin', 'cli.js');
+    this.cliPath = path.join(__dirname, '..', 'src', 'cli.js');
 
     // Common test files
     this.testInputFile = path.join(this.testFilesDir, 'test.txt');
@@ -322,11 +322,11 @@ class TestHelpers {
         expect(signature.validity).toHaveProperty('not_before');
         expect(signature.validity).toHaveProperty('not_after');
 
-      //   // Verify assertions structure
-      //   expect(Array.isArray(manifest.assertions)).toBe(true);
-      //   manifest.assertions.forEach(assertion => {
-      //     expect(assertion).toHaveProperty('label');
-      //   });
+        //   // Verify assertions structure
+        //   expect(Array.isArray(manifest.assertions)).toBe(true);
+        //   manifest.assertions.forEach(assertion => {
+        //     expect(assertion).toHaveProperty('label');
+        //   });
       });
     }
   }

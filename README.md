@@ -43,10 +43,10 @@ indicator-extractor input.jpg ./output --pretty
 
 ```bash
 # Run from the project directory
-node bin/cli.js input.jpg ./output
+node src/cli.js input.jpg ./output
 
 # With pretty printing
-node bin/cli.js input.jpg ./output --pretty
+node src/cli.js input.jpg ./output --pretty
 ```
 
 ### Command Line Arguments
@@ -151,7 +151,7 @@ The project uses modern ESLint configuration with the following features:
 
 ```
 indicator-extractor/
-├── bin/
+├── src/
 │   └── cli.js              # Main CLI script
 │   └── indicatorSet.js     # Create the Trust Indicator Set
 │   └── processManifest.js  # Process any C2PA/JPEG Trust Manifests
@@ -177,7 +177,7 @@ indicator-extractor/
 ### Jest Configuration (`jest.config.js`)
 
 - **Test Environment**: Node.js
-- **Coverage Collection**: Collects coverage from `bin/**/*.js`
+- **Coverage Collection**: Collects coverage from `src/**/*.js`
 - **Test Pattern**: Matches `**/tests/**/*.test.js`
 - **Coverage Reports**: Text, LCOV, and HTML formats
 
