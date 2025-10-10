@@ -13,7 +13,7 @@ governing permissions and limitations under the License.
 import { BMFF, JPEG, PNG } from '@trustnxt/c2pa-ts/asset';
 import { ManifestStore } from '@trustnxt/c2pa-ts/manifest';
 import { SuperBox } from '@trustnxt/c2pa-ts/jumbf';
-import { generateIndicatorSet } from './indicatorSet.js';
+import { generateIndicatorSet, extractMetadata } from './indicatorSet.js';
 
 
 /**
@@ -128,6 +128,10 @@ async function processManifestStore(fileBuffer, asIndicatorSet) {
           c2paInfo.indicatorSet.validation_status = c2paInfo.validationStatus;
         }
       }
+    } else {
+      // Extract metadata using exifr if fileBuffer is provided
+      c2paInfo.indicatorSet = {};
+      c2paInfo.indicatorSet.metadata = await extractMetadata(fileBuffer);
     }
   } catch (error) {
     // File might not have C2PA data, or there might be another issue

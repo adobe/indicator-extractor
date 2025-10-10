@@ -29,7 +29,7 @@ program
   .argument('<output-dir>', 'output directory for the JSON file')
   .option('-p, --pretty', 'pretty print JSON output', false)
   .option('-s, --set', 'output JPEG Trust Indicator Set grammar', false)
-  .action(async(inputFile, outputDir, options) => {
+  .action(async (inputFile, outputDir, options) => {
     try {
       await processFile(inputFile, outputDir, options);
     } catch (error) {
@@ -137,6 +137,31 @@ async function processFile(inputFile, outputDir, options) {
       });
   }
 
+  /**
+   * Merges metadata from c2paInfo.indicatorSet with outputData.metadata if available.
+   *
+   * @param {Object} c2paInfo - The C2PA information object that may contain an indicatorSet
+   * @param {Object} outputData - The output data object that should have a metadata property to merge into
+   */
+  function mergeIndicatorSetMetadata(c2paInfo, outputData) {
+    // Check if c2paInfo.indicatorSet exists and has a metadata member that is an object
+    if (c2paInfo &&
+      c2paInfo.indicatorSet &&
+      c2paInfo.indicatorSet.metadata &&
+      typeof c2paInfo.indicatorSet.metadata === 'object' &&
+      c2paInfo.indicatorSet.metadata !== null) {
+
+      // Ensure outputData.metadata exists
+      if (!outputData.metadata || typeof outputData.metadata !== 'object') {
+        outputData.metadata = {};
+      }
+
+      // Merge the metadata objects
+      Object.assign(outputData.metadata, c2paInfo.indicatorSet.metadata);
+    }
+  }
+
+
   if (c2paInfo && c2paInfo.hasManifestStore) {
     console.log(`🔐 C2PA: Found ${c2paInfo.manifestCount} manifest(s), Valid: ${c2paInfo.validationStatus.isValid}`);
 
@@ -146,8 +171,32 @@ async function processFile(inputFile, outputDir, options) {
     }
   } else if (c2paInfo && c2paInfo.manifestCount === 0) {
     console.log('🔐 C2PA: No manifests found in file');
+
+    // if the --set option is used, output the indicator set
+    if (options.set) {
+      const indicatorSet = {
+        '@context': ['https://jpeg.org/jpegtrust'],
+        manifests: [],
+        content: {},
+        metadata: {},
+      };
+      mergeIndicatorSetMetadata(c2paInfo, indicatorSet);
+      await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
+    }
   } else if (c2paInfo && c2paInfo.error) {
     console.log(`🔐 C2PA: Error - ${c2paInfo.error}`);
+
+    // if the --set option is used, output the indicator set
+    if (options.set) {
+      const indicatorSet = {
+        '@context': ['https://jpeg.org/jpegtrust'],
+        manifests: [],
+        content: {},
+        metadata: {},
+      };
+      mergeIndicatorSetMetadata(c2paInfo, indicatorSet);
+      await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
+    }
   } else if (options.set) {
     const indicatorSet = {
       '@context': ['https://jpeg.org/jpegtrust'],

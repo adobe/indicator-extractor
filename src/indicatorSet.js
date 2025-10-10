@@ -24,7 +24,23 @@ import { createHash } from 'crypto';
 async function extractMetadata(fileBuffer) {
   if (!fileBuffer) return {};
   try {
-    const tags = await exifr.parse(fileBuffer);
+    // settings used to extract the XMP in full namespace
+    const options = {
+      // tiff: true & ihdr: true - default
+      // obviously we want to extract the XMP
+      xmp: true,
+      jfif: true,
+      iptc: true,
+      icc: false, // don't need all the ICC profile data
+
+      // We need to tell exifr not to stop at the first XMP segment, but to find them all.
+      multiSegment: true,
+      // There could be mutliple XMP namespaces with the same properties
+      // We don't want them to overwrite each other.
+      mergeOutput: false,
+    }
+
+    const tags = await exifr.parse(fileBuffer, options);
 
     // Process and structure the metadata
     const processedMetadata = {};
@@ -374,4 +390,28 @@ async function generateIndicatorSet(manifestStore, validationResult, fileBuffer)
   return indicatorSet;
 }
 
-export { generateIndicatorSet };
+/**
+ * Merges metadata from c2paInfo.indicatorSet with outputData.metadata if available.
+ *
+ * @param {Object} c2paInfo - The C2PA information object that may contain an indicatorSet
+ * @param {Object} outputData - The output data object that should have a metadata property to merge into
+ */
+function mergeIndicatorSetMetadata(c2paInfo, outputData) {
+  // Check if c2paInfo.indicatorSet exists and has a metadata member that is an object
+  if (c2paInfo &&
+    c2paInfo.indicatorSet &&
+    c2paInfo.indicatorSet.metadata &&
+    typeof c2paInfo.indicatorSet.metadata === 'object' &&
+    c2paInfo.indicatorSet.metadata !== null) {
+
+    // Ensure outputData.metadata exists
+    if (!outputData.metadata || typeof outputData.metadata !== 'object') {
+      outputData.metadata = {};
+    }
+
+    // Merge the metadata objects
+    Object.assign(outputData.metadata, c2paInfo.indicatorSet.metadata);
+  }
+}
+
+export { generateIndicatorSet, extractMetadata, mergeIndicatorSetMetadata };
