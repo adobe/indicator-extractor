@@ -224,5 +224,17 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     },
+    {
+      "name": "RunwayAI",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/runway_cai.png",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+    }
   ]
 }
