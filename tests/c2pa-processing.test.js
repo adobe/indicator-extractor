@@ -30,6 +30,7 @@ describe('C2PA Image Processing', () => {
       testHelpers.imageFiles.chatgptImage,
       'ChatGPT_Image.json',
       {
+        cliFlags: ['--basic'],
         expectedExtension: '.png',
         expectedFileName: 'ChatGPT_Image.png',
         expectedFormat: 'PNG',
@@ -44,6 +45,7 @@ describe('C2PA Image Processing', () => {
         testHelpers.imageFiles.multipleManifests,
         'Multiple_Manifests.json',
         {
+          cliFlags: ['--basic'],
           expectedExtension: '.jpg',
           expectedFileName: 'Multiple_Manifests.jpg',
           expectedFormat: 'JPEG',
@@ -67,6 +69,7 @@ describe('C2PA Image Processing', () => {
       testHelpers.imageFiles.simplePhoto,
       'SimplePhoto.json',
       {
+        cliFlags: ['--basic'],
         expectedExtension: '.jpeg',
         expectedFileName: 'SimplePhoto.jpeg',
         expectedFormat: 'JPEG',
@@ -88,7 +91,7 @@ describe('C2PA Image Processing', () => {
       testHelpers.imageFiles.chatgptImage,
       'ChatGPT_Image.json',
       {
-        cliFlags: ['--pretty'],
+        cliFlags: ['--basic', '--pretty'],
         expectedC2PA: true,
       },
     );
@@ -152,6 +155,7 @@ describe('C2PA Image Processing', () => {
       testHelpers.imageFiles.trustDeclaration,
       's11-trust-declaration.json',
       {
+        cliFlags: ['--basic'],
         expectedExtension: '.jpeg',
         expectedFileName: 's11-trust-declaration.jpeg',
         expectedFormat: 'JPEG',
@@ -186,20 +190,14 @@ describe('C2PA Image Processing', () => {
     // Run CLI with multiple files
     const result = testHelpers.runCLI(inputFiles, testHelpers.testDir, ['--pretty']);
 
-    // Check that all output files were created
-    const chatgptOutput = path.join(testHelpers.testDir, 'ChatGPT_Image.json');
+    // Check that indicator set files were created (only indicator sets, no basic JSON files)
     const chatgptIndicators = path.join(testHelpers.testDir, 'ChatGPT_Image-indicators.json');
-    const simplePhotoOutput = path.join(testHelpers.testDir, 'SimplePhoto.json');
     const simplePhotoIndicators = path.join(testHelpers.testDir, 'SimplePhoto-indicators.json');
-    const scenario1Output = path.join(testHelpers.testDir, 'scenario_1_v2.json');
     const scenario1Indicators = path.join(testHelpers.testDir, 'scenario_1_v2-indicators.json');
 
-    // Verify all output files exist
-    expect(await fs.pathExists(chatgptOutput)).toBe(true);
+    // Verify all indicator set files exist
     expect(await fs.pathExists(chatgptIndicators)).toBe(true);
-    expect(await fs.pathExists(simplePhotoOutput)).toBe(true);
     expect(await fs.pathExists(simplePhotoIndicators)).toBe(true);
-    expect(await fs.pathExists(scenario1Output)).toBe(true);
     expect(await fs.pathExists(scenario1Indicators)).toBe(true);
 
     // Check CLI output contains summary
@@ -207,24 +205,25 @@ describe('C2PA Image Processing', () => {
     expect(result).toContain('Total files: 3');
     expect(result).toContain('Successful: 3');
 
-    // Verify C2PA data in one of the files with manifests
-    const chatgptData = JSON.parse(await fs.readFile(chatgptOutput, 'utf8'));
-    expect(chatgptData.c2pa).toBeDefined();
-    expect(chatgptData.c2pa.hasManifestStore).toBe(true);
-    expect(chatgptData.c2pa.manifestCount).toBeGreaterThan(0);
-
-    // Verify C2PA data shows no manifests for SimplePhoto
-    const simplePhotoData = JSON.parse(await fs.readFile(simplePhotoOutput, 'utf8'));
-    expect(simplePhotoData.c2pa).toBeDefined();
-    expect(simplePhotoData.c2pa.hasManifestStore).toBe(false);
-    expect(simplePhotoData.c2pa.manifestCount).toBe(0);
-
     // Verify indicator set was created for file with manifests
     const chatgptIndicatorsData = JSON.parse(await fs.readFile(chatgptIndicators, 'utf8'));
     expect(chatgptIndicatorsData['@context']).toBeDefined();
     expect(chatgptIndicatorsData.manifests).toBeDefined();
     expect(Array.isArray(chatgptIndicatorsData.manifests)).toBe(true);
     expect(chatgptIndicatorsData.manifests.length).toBeGreaterThan(0);
+
+    // Verify indicator set was created for SimplePhoto even though it has no manifests
+    const simplePhotoIndicatorsData = JSON.parse(await fs.readFile(simplePhotoIndicators, 'utf8'));
+    expect(simplePhotoIndicatorsData['@context']).toBeDefined();
+    expect(simplePhotoIndicatorsData.manifests).toBeDefined();
+    expect(Array.isArray(simplePhotoIndicatorsData.manifests)).toBe(true);
+    expect(simplePhotoIndicatorsData.manifests.length).toBe(0); // No manifests
+
+    // Verify indicator set was created for scenario 1
+    const scenario1IndicatorsData = JSON.parse(await fs.readFile(scenario1Indicators, 'utf8'));
+    expect(scenario1IndicatorsData['@context']).toBeDefined();
+    expect(scenario1IndicatorsData.manifests).toBeDefined();
+    expect(Array.isArray(scenario1IndicatorsData.manifests)).toBe(true);
   });
 
 });

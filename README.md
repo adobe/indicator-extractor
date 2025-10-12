@@ -107,10 +107,36 @@ indicator-extractor photo.jpg document.png image.heif -o ./results
 
 ## Output Format
 
-The CLI generates two JSON files by default:
+The CLI generates different JSON output depending on the mode:
 
-### 1. Main Output File (`<filename>.json`)
-Contains basic file information and C2PA data:
+### Default Mode: Trust Indicator Set (`<filename>-indicators.json`)
+**For binary files (images)**, the CLI generates a single Trust Indicator Set file by default, as defined in ISO 21617-1:
+
+```json
+{
+  "@context": ["https://jpeg.org/jpegtrust"],
+  "manifests": [
+    {
+      "label": "manifest_label",
+      "claim.v2": { ... },
+      "claim_signature": { ... },
+      "assertions": [ ... ]
+    }
+  ],
+  "content": { ... },
+  "metadata": { ... },
+  "asset_info": {
+    "alg": "sha256",
+    "hash": "..."
+  }
+}
+```
+
+This is the recommended output format for most use cases as it provides the complete Trust Indicator Set.
+
+### Basic Content Analysis Mode (`<filename>.json`)
+
+**For text files**, or when using the `--basic` flag with binary files, a single basic analysis file is generated:
 
 ```json
 {
@@ -141,41 +167,7 @@ Contains basic file information and C2PA data:
 }
 ```
 
-### 2. Trust Indicator Set File (`<filename>-indicators.json`)
-Contains the Trust Indicator Set as defined in ISO 21617-1:
-
-```json
-{
-  "@context": ["https://jpeg.org/jpegtrust"],
-  "manifests": [
-    {
-      "label": "manifest_label",
-      "claim.v2": { ... },
-      "claim_signature": { ... },
-      "assertions": [ ... ]
-    }
-  ],
-  "content": { ... },
-  "metadata": { ... },
-  "asset_info": {
-    "alg": "sha256",
-    "hash": "..."
-  }
-}
-```
-
-### Basic Content Analysis Mode
-
-When using the `--basic` flag (for when Trust Indicator Sets are not needed), only the main output file is generated with content analysis:
-
-```json
-{
-  "metadata": { ... },
-  "content": { ... },
-  "c2pa": { ... },
-  "processing": { ... }
-}
-```
+The `--basic` flag is useful when you only need basic file information and C2PA metadata without the full Trust Indicator Set.
 
 ## Development
 
@@ -304,13 +296,14 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## Changelog
 
 ### v1.1.0
-- **Breaking Change**: Trust Indicator Set generation is now the default behaviour
+- **Breaking Change**: Trust Indicator Set generation is now the default behavior
+- **Breaking Change**: Only a single JSON file is created (indicator set by default, or basic JSON with `--basic`)
 - Added support for processing multiple files in a single command (supports wildcards)
 - Changed output directory from positional argument to optional `-o` or `--output` flag (defaults to input file directory)
-- Added `--basic` flag to skip Trust Indicator Set generation (replaces old default behaviour)
+- Added `--basic` flag to generate basic content analysis only (skips indicator set generation)
 - Removed `--set` flag (functionality is now default)
 - Added summary output when processing multiple files
-- Updated all tests and documentation to reflect new default behaviour
+- Updated all tests and documentation to reflect new behavior
 
 ### v1.0.0
 - Initial release

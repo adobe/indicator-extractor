@@ -141,31 +141,40 @@ async function processFile(inputFile, outputDir, options) {
     },
   };
 
-  // Write JSON output
-  const jsonContent = options.pretty
-    ? JSON.stringify(outputData, null, 2)
-    : JSON.stringify(outputData);
-  await fs.writeFile(outputPath, jsonContent, 'utf8');
+  // Determine what to output based on --basic flag
+  const shouldOutputIndicatorSet = !isTextFile && !options.basic;
+  const shouldOutputBasicJson = options.basic || isTextFile;
+
+  // Write basic JSON output only if --basic flag is used or it's a text file
+  if (shouldOutputBasicJson) {
+    const jsonContent = options.pretty
+      ? JSON.stringify(outputData, null, 2)
+      : JSON.stringify(outputData);
+    await fs.writeFile(outputPath, jsonContent, 'utf8');
+  }
 
   // now log some information about the processed file
   console.log('✅ File processed successfully!');
   console.log(`📁 Input: ${inputPath}`);
-  console.log(`📄 Output: ${outputPath}`);
+
+  if (shouldOutputBasicJson) {
+    console.log(`📄 Output: ${outputPath}`);
+  }
 
   if (isTextFile) {
     console.log(`📊 Stats: ${outputData.content.lineCount} lines, ${outputData.content.wordCount} words, ${outputData.content.characterCount} characters`);
-  } else {
+  } else if (shouldOutputBasicJson) {
     console.log(`📊 Stats: Binary file, ${outputData.content.size} bytes`);
   }
 
-  // inline function to output the indicator set if requested
+  // inline function to output the indicator set
   function outputIndicatorSet(indicatorSet, indicatorSetPath, prettyPrint) {
     const indicatorSetContent = prettyPrint
       ? JSON.stringify(indicatorSet, null, 2)
       : JSON.stringify(indicatorSet);
     return fs.writeFile(indicatorSetPath, indicatorSetContent, 'utf8')
       .then(() => {
-        console.log(`🤝 Trust Indicator Set: ${indicatorSetPath}`);
+        console.log(`📄 Output: ${indicatorSetPath}`);
       })
       .catch(err => {
         console.error(`Error writing indicator set: ${err.message}`);
@@ -198,43 +207,39 @@ async function processFile(inputFile, outputDir, options) {
 
 
   // Only generate indicator sets for binary files (images), not text files
-  if (!isTextFile) {
+  if (shouldOutputIndicatorSet) {
     if (c2paInfo && c2paInfo.hasManifestStore) {
       console.log(`🔐 C2PA: Found ${c2paInfo.manifestCount} manifest(s), Valid: ${c2paInfo.validationStatus.isValid}`);
 
-      // Output indicator set unless --basic option is used
-      if (!options.basic && c2paInfo.indicatorSet) {
+      // Output indicator set
+      if (c2paInfo.indicatorSet) {
         await outputIndicatorSet(c2paInfo.indicatorSet, indicatorSetPath, options.pretty);
       }
     } else if (c2paInfo && c2paInfo.manifestCount === 0) {
       console.log('🔐 C2PA: No manifests found in file');
 
-      // Output indicator set unless --basic option is used
-      if (!options.basic) {
-        const indicatorSet = {
-          '@context': ['https://jpeg.org/jpegtrust'],
-          manifests: [],
-          content: {},
-          metadata: {},
-        };
-        mergeIndicatorSetMetadata(c2paInfo, indicatorSet);
-        await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
-      }
+      // Output indicator set
+      const indicatorSet = {
+        '@context': ['https://jpeg.org/jpegtrust'],
+        manifests: [],
+        content: {},
+        metadata: {},
+      };
+      mergeIndicatorSetMetadata(c2paInfo, indicatorSet);
+      await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
     } else if (c2paInfo && c2paInfo.error) {
       console.log(`🔐 C2PA: Error - ${c2paInfo.error}`);
 
-      // Output indicator set unless --basic option is used
-      if (!options.basic) {
-        const indicatorSet = {
-          '@context': ['https://jpeg.org/jpegtrust'],
-          manifests: [],
-          content: {},
-          metadata: {},
-        };
-        mergeIndicatorSetMetadata(c2paInfo, indicatorSet);
-        await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
-      }
-    } else if (!options.basic) {
+      // Output indicator set
+      const indicatorSet = {
+        '@context': ['https://jpeg.org/jpegtrust'],
+        manifests: [],
+        content: {},
+        metadata: {},
+      };
+      mergeIndicatorSetMetadata(c2paInfo, indicatorSet);
+      await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
+    } else {
       const indicatorSet = {
         '@context': ['https://jpeg.org/jpegtrust'],
         manifests: [],
@@ -242,6 +247,15 @@ async function processFile(inputFile, outputDir, options) {
         metadata: {},
       };
       await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
+    }
+  } else if (!isTextFile && options.basic) {
+    // Log C2PA info when using --basic mode
+    if (c2paInfo && c2paInfo.hasManifestStore) {
+      console.log(`🔐 C2PA: Found ${c2paInfo.manifestCount} manifest(s), Valid: ${c2paInfo.validationStatus.isValid}`);
+    } else if (c2paInfo && c2paInfo.manifestCount === 0) {
+      console.log('🔐 C2PA: No manifests found in file');
+    } else if (c2paInfo && c2paInfo.error) {
+      console.log(`🔐 C2PA: Error - ${c2paInfo.error}`);
     }
   }
 }
