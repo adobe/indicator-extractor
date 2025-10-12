@@ -55,14 +55,25 @@ class TestHelpers {
 
   /**
    * Run CLI command and return result
-   * @param {string} inputFile - Path to input file
+   * @param {string|string[]} inputFile - Path to input file(s) - can be a single file, array of files, or space-separated string
    * @param {string} outputDir - Path to output directory
    * @param {string[]} flags - Additional CLI flags
    * @returns {string} Command output
    */
   runCLI(inputFile, outputDir = this.testDir, flags = []) {
     const flagsStr = flags.length > 0 ? ` ${flags.join(' ')}` : '';
-    const command = `node "${this.cliPath}" "${inputFile}" -o "${outputDir}"${flagsStr}`;
+    // Handle multiple input files
+    let inputFilesStr;
+    if (Array.isArray(inputFile)) {
+      inputFilesStr = inputFile.map(f => `"${f}"`).join(' ');
+    } else if (inputFile.includes(' ')) {
+      // Space-separated string of files
+      inputFilesStr = inputFile.split(' ').map(f => `"${f.trim()}"`).join(' ');
+    } else {
+      // Single file
+      inputFilesStr = `"${inputFile}"`;
+    }
+    const command = `node "${this.cliPath}" ${inputFilesStr} -o "${outputDir}"${flagsStr}`;
     return execSync(command, {
       encoding: 'utf8',
       env: {

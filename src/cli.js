@@ -25,15 +25,47 @@ program
   .version('1.0.0');
 
 program
-  .argument('<input-file>', 'input file to process')
+  .argument('<input-files...>', 'input file(s) to process (supports wildcards)')
   .option('-o, --output <output-dir>', 'output directory for the JSON file (defaults to input file directory)')
   .option('-p, --pretty', 'pretty print JSON output', false)
   .option('-b, --basic', 'output basic content analysis only (skip indicator set generation)', false)
-  .action(async (inputFile, options) => {
+  .action(async (inputFiles, options) => {
     try {
-      // If no output directory specified, use the directory of the input file
-      const outputDir = options.output || path.dirname(path.resolve(inputFile));
-      await processFile(inputFile, outputDir, options);
+      const results = {
+        total: inputFiles.length,
+        successful: 0,
+        failed: 0,
+        errors: [],
+      };
+
+      // Process each input file
+      for (const inputFile of inputFiles) {
+        try {
+          // If no output directory specified, use the directory of the input file
+          const outputDir = options.output || path.dirname(path.resolve(inputFile));
+          await processFile(inputFile, outputDir, options);
+          results.successful++;
+        } catch (error) {
+          results.failed++;
+          results.errors.push({ file: inputFile, error: error.message });
+          console.error(`❌ Error processing ${inputFile}: ${error.message}`);
+        }
+      }
+
+      // Print summary if multiple files were processed
+      if (inputFiles.length > 1) {
+        console.log('\n📊 Summary:');
+        console.log(`   Total files: ${results.total}`);
+        console.log(`   ✅ Successful: ${results.successful}`);
+        if (results.failed > 0) {
+          console.log(`   ❌ Failed: ${results.failed}`);
+        }
+      }
+
+      // Exit with error code if any files failed
+      if (results.failed > 0 && results.successful === 0) {
+        process.exit(1);
+      }
     } catch (error) {
       console.error('Error:', error.message);
       process.exit(1);

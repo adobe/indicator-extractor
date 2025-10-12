@@ -32,7 +32,7 @@ npm install -g .
 ### Basic Usage
 
 ```bash
-# Process a file with Trust Indicator Set (output to same directory as input file)
+# Process a single file with Trust Indicator Set (output to same directory as input file)
 indicator-extractor input.jpg
 
 # Process a file with Trust Indicator Set and pretty-printed JSON output
@@ -40,6 +40,13 @@ indicator-extractor input.png --pretty
 
 # Process a file with basic content analysis only (no indicator set)
 indicator-extractor input.jpg --basic
+
+# Process multiple files at once
+indicator-extractor file1.jpg file2.jpg file3.jpg --pretty
+
+# Process multiple files with wildcards (shell expands wildcards)
+indicator-extractor *.jpg --pretty
+indicator-extractor images/*.png -o ./output
 
 # Specify output directory with -o flag
 indicator-extractor input.jpg -o ./output
@@ -60,16 +67,43 @@ node src/cli.js input.png --pretty
 # With basic content analysis only (no indicator set)
 node src/cli.js input.jpg --basic
 
+# Process multiple files
+node src/cli.js file1.jpg file2.jpg file3.jpg --pretty
+
+# Process with wildcards (shell expands *.jpg)
+node src/cli.js testfiles/*.jpg -o ./output --pretty
+
 # Specify output directory
 node src/cli.js input.jpg -o ./output --pretty
 ```
 
 ### Command Line Arguments
 
-- `<input-file>`: Path to the input file to process (required)
+- `<input-files...>`: Path to input file(s) to process - supports multiple files and wildcards (required)
 - `-o, --output <output-dir>`: Directory where the JSON output file will be created (optional, defaults to input file directory)
 - `-p, --pretty`: Pretty print the JSON output (optional, default: false)
 - `-b, --basic`: Output basic content analysis only, skip Trust Indicator Set generation (optional, default: false)
+
+### Multiple File Processing
+
+The CLI supports processing multiple files in a single command. When processing multiple files:
+- Each file is processed independently
+- A summary is displayed showing total files processed, successful, and failed
+- Processing continues even if individual files fail
+- Exit code is 0 if at least one file succeeds, 1 if all files fail
+
+**Examples:**
+```bash
+# Process multiple specific files
+indicator-extractor photo1.jpg photo2.jpg photo3.jpg --pretty
+
+# Use wildcards (expanded by your shell)
+indicator-extractor *.jpg -o ./output
+indicator-extractor images/**/*.png --pretty
+
+# Mix different file types
+indicator-extractor photo.jpg document.png image.heif -o ./results
+```
 
 ## Output Format
 
@@ -271,9 +305,11 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ### v1.1.0
 - **Breaking Change**: Trust Indicator Set generation is now the default behaviour
+- Added support for processing multiple files in a single command (supports wildcards)
 - Changed output directory from positional argument to optional `-o` or `--output` flag (defaults to input file directory)
 - Added `--basic` flag to skip Trust Indicator Set generation (replaces old default behaviour)
 - Removed `--set` flag (functionality is now default)
+- Added summary output when processing multiple files
 - Updated all tests and documentation to reflect new default behaviour
 
 ### v1.0.0
