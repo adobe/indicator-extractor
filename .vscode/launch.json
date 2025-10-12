@@ -8,7 +8,7 @@
       "name": "Text file",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/test.txt",
         "${workspaceFolder}/output",
@@ -21,7 +21,7 @@
       "name": "SimplePhoto",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/SimplePhoto.jpeg",
         "${workspaceFolder}/output",
@@ -34,7 +34,7 @@
       "name": "ChatGPT PNG",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/ChatGPT_Image.png",
         "${workspaceFolder}/output",
@@ -47,7 +47,7 @@
       "name": "IS: ChatGPT PNG",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/ChatGPT_Image.png",
         "${workspaceFolder}/output",
@@ -61,7 +61,7 @@
       "name": "Multiple Manifests",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/Multiple_Manifests.jpg",
         "${workspaceFolder}/output",
@@ -74,7 +74,7 @@
       "name": "IS: Multiple Manifests",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/Multiple_Manifests.jpg",
         "${workspaceFolder}/output",
@@ -88,7 +88,7 @@
       "name": "IS: HEIF",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/sample-out.heif",
         "${workspaceFolder}/output",
@@ -102,7 +102,7 @@
       "name": "S01",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_1_v2.jpeg",
         "${workspaceFolder}/output",
@@ -116,7 +116,7 @@
       "name": "S02",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_2_ExtMods.jpeg",
         "${workspaceFolder}/output",
@@ -130,7 +130,7 @@
       "name": "S04",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_4_CAWGM.jpeg",
         "${workspaceFolder}/output",
@@ -144,7 +144,7 @@
       "name": "S05",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_5_Rights.jpeg",
         "${workspaceFolder}/output",
@@ -158,7 +158,7 @@
       "name": "S06",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_6_SoftBinding.jpeg",
         "${workspaceFolder}/output",
@@ -172,7 +172,7 @@
       "name": "S9",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_9_ProtectedAssertion.jpeg",
         "${workspaceFolder}/output",
@@ -186,7 +186,7 @@
       "name": "S10",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_10_ProtectedManifest_v2.jpeg",
         "${workspaceFolder}/output",
@@ -200,7 +200,7 @@
       "name": "S11",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/cli.js",
+      "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/s11-trust-declaration.jpeg",
         "${workspaceFolder}/output",
@@ -210,5 +210,31 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     },
+    {
+      "name": "XMP-Example-1",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/XMP-only-example1.jpg",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "RunwayAI",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/cli.js",
+      "args": [
+        "${workspaceFolder}/testfiles/runway_cai.png",
+        "${workspaceFolder}/output",
+        "--pretty",
+        "--set"
+      ],
+    }
   ]
 }
