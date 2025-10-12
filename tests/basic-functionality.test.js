@@ -69,4 +69,55 @@ describe('Basic CLI Functionality', () => {
     // Check that it's minified (no unnecessary whitespace)
     expect(outputContent).not.toMatch(/\n {2}/);
   });
+
+  test('should process multiple files with wildcards', async() => {
+    // Create multiple test files
+    const testFile1 = await testHelpers.createTestFile('file1.txt', 'Content of file 1');
+    const testFile2 = await testHelpers.createTestFile('file2.txt', 'Content of file 2');
+    const testFile3 = await testHelpers.createTestFile('file3.txt', 'Content of file 3');
+
+    // Run CLI with multiple files
+    const result = testHelpers.runCLI([testFile1, testFile2, testFile3], testHelpers.testDir, ['--pretty']);
+
+    // Check that all output files were created
+    const outputFile1 = path.join(testHelpers.testDir, 'file1.json');
+    const outputFile2 = path.join(testHelpers.testDir, 'file2.json');
+    const outputFile3 = path.join(testHelpers.testDir, 'file3.json');
+
+    expect(await fs.pathExists(outputFile1)).toBe(true);
+    expect(await fs.pathExists(outputFile2)).toBe(true);
+    expect(await fs.pathExists(outputFile3)).toBe(true);
+
+    // Check CLI output contains summary
+    expect(result).toContain('Summary:');
+    expect(result).toContain('Total files: 3');
+    expect(result).toContain('Successful: 3');
+
+    // Verify content of one file
+    const output1Data = JSON.parse(await fs.readFile(outputFile1, 'utf8'));
+    expect(output1Data.content.rawContent).toBe('Content of file 1');
+  });
+
+  test('should handle errors gracefully when processing multiple files', async() => {
+    // Create one valid test file and reference one non-existent file
+    const validFile = await testHelpers.createTestFile('valid.txt', 'Valid content');
+    const invalidFile = path.join(testHelpers.testDir, 'nonexistent.txt');
+
+    // Run CLI with mixed valid/invalid files
+    const result = testHelpers.runCLI([validFile, invalidFile], testHelpers.testDir, ['--pretty']);
+
+    // Check that valid file was processed
+    const validOutputFile = path.join(testHelpers.testDir, 'valid.json');
+    expect(await fs.pathExists(validOutputFile)).toBe(true);
+
+    // Check CLI output contains summary
+    expect(result).toContain('Summary:');
+    expect(result).toContain('Total files: 2');
+    expect(result).toContain('Successful: 1');
+    expect(result).toContain('Failed: 1');
+
+    // Verify the valid file's content
+    const validOutputData = JSON.parse(await fs.readFile(validOutputFile, 'utf8'));
+    expect(validOutputData.content.rawContent).toBe('Valid content');
+  });
 });

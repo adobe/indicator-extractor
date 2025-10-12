@@ -11,8 +11,10 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/test.txt",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty"
+        "--pretty",
+        "--basic"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -24,6 +26,7 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/SimplePhoto.jpeg",
+        "-o",
         "${workspaceFolder}/output",
         "--pretty"
       ],
@@ -37,6 +40,7 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/ChatGPT_Image.png",
+        "-o",
         "${workspaceFolder}/output",
         "--pretty"
       ],
@@ -50,9 +54,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/ChatGPT_Image.png",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -64,6 +68,7 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/Multiple_Manifests.jpg",
+        "-o",
         "${workspaceFolder}/output",
         "--pretty"
       ],
@@ -77,9 +82,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/Multiple_Manifests.jpg",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -91,9 +96,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/sample-out.heif",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -105,9 +110,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_1_v2.jpeg",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -119,9 +124,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_2_ExtMods.jpeg",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -133,9 +138,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_4_CAWGM.jpeg",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -147,9 +152,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_5_Rights.jpeg",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -161,9 +166,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_6_SoftBinding.jpeg",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -175,9 +180,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_9_ProtectedAssertion.jpeg",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -189,9 +194,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/scenario_10_ProtectedManifest_v2.jpeg",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -203,9 +208,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/s11-trust-declaration.jpeg",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -217,9 +222,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/XMP-only-example1.jpg",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -231,9 +236,9 @@
       "program": "${workspaceFolder}/src/cli.js",
       "args": [
         "${workspaceFolder}/testfiles/runway_cai.png",
+        "-o",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
     }
   ]

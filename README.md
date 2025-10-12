@@ -1,11 +1,11 @@
 # Indicator Extractor CLI
 
-A Node.js command line application that processes JPEG 1 and PNG files and outputs structured JSON results - either simple information, or Trust Indicator Sets, as defined in ISO 21617-1.
+A Node.js command line application that processes JPEG 1, PNG, and HEIC/HEIF files and outputs structured JSON results including Trust Indicator Sets, as defined in ISO 21617-1.
 
 ## Features
 
-- 📁 **File Processing**: Process files and extract useful information, including as a Trust Indicator Set
-- 📊 **Basic Content Analysis**: Provides some useful information about the file and its content
+- 📁 **File Processing**: Process files and extract Trust Indicator Sets by default
+- 📊 **Content Analysis**: Provides useful information about the file and its content
 - 🎯 **JSON Output**: Generate structured JSON in various syntaxes
 - 🎨 **Pretty Printing**: Support for both minified and pretty-printed JSON output
 - 📂 **Directory Management**: Automatically creates output directories as needed
@@ -32,48 +32,133 @@ npm install -g .
 ### Basic Usage
 
 ```bash
-# Process a file with minified JSON output
-indicator-extractor input.jpg ./output
+# Process a single file with Trust Indicator Set (output to same directory as input file)
+indicator-extractor input.jpg
 
-# Process a file with pretty-printed JSON output
-indicator-extractor input.jpg ./output --pretty
+# Process a file with Trust Indicator Set and pretty-printed JSON output
+indicator-extractor input.png --pretty
+
+# Process a file with basic content analysis only (no indicator set)
+indicator-extractor input.jpg --basic
+
+# Process multiple files at once
+indicator-extractor file1.jpg file2.jpg file3.jpg --pretty
+
+# Process multiple files with wildcards (shell expands wildcards)
+indicator-extractor *.jpg --pretty
+indicator-extractor images/*.png -o ./output
+
+# Specify output directory with -o flag
+indicator-extractor input.jpg -o ./output
+
+# You can also use --output instead of -o
+indicator-extractor input.jpg --output ./output --pretty
 ```
 
 ### Using the CLI directly
 
 ```bash
-# Run from the project directory
-node src/cli.js input.jpg ./output
+# Run from the project directory (output to same directory as input file)
+node src/cli.js input.jpg
 
 # With pretty printing
-node src/cli.js input.jpg ./output --pretty
+node src/cli.js input.png --pretty
+
+# With basic content analysis only (no indicator set)
+node src/cli.js input.jpg --basic
+
+# Process multiple files
+node src/cli.js file1.jpg file2.jpg file3.jpg --pretty
+
+# Process with wildcards (shell expands *.jpg)
+node src/cli.js testfiles/*.jpg -o ./output --pretty
+
+# Specify output directory
+node src/cli.js input.jpg -o ./output --pretty
 ```
 
 ### Command Line Arguments
 
-- `<input-file>`: Path to the input file to process (required)
-- `<output-dir>`: Directory where the JSON output file will be created (required)
-- `-p, --pretty`: Pretty print the JSON output (optional)
-- `-s, --set`: Generate a Trust Indicator Set (optional, default is basic content analysis)
+- `<input-files...>`: Path to input file(s) to process - supports multiple files and wildcards (required)
+- `-o, --output <output-dir>`: Directory where the JSON output file will be created (optional, defaults to input file directory)
+- `-p, --pretty`: Pretty print the JSON output (optional, default: false)
+- `-b, --basic`: Output basic content analysis only, skip Trust Indicator Set generation (optional, default: false)
+
+### Multiple File Processing
+
+The CLI supports processing multiple files in a single command. When processing multiple files:
+- Each file is processed independently
+- A summary is displayed showing total files processed, successful, and failed
+- Processing continues even if individual files fail
+- Exit code is 0 if at least one file succeeds, 1 if all files fail
+
+**Examples:**
+```bash
+# Process multiple specific files
+indicator-extractor photo1.jpg photo2.jpg photo3.jpg --pretty
+
+# Use wildcards (expanded by your shell)
+indicator-extractor *.jpg -o ./output
+indicator-extractor images/**/*.png --pretty
+
+# Mix different file types
+indicator-extractor photo.jpg document.png image.heif -o ./results
+```
 
 ## Output Format
 
-The CLI generates a JSON file with the following structure:
+The CLI generates different JSON output depending on the mode:
+
+### Default Mode: Trust Indicator Set (`<filename>-indicators.json`)
+**For binary files (images)**, the CLI generates a single Trust Indicator Set file by default, as defined in ISO 21617-1:
+
+```json
+{
+  "@context": ["https://jpeg.org/jpegtrust"],
+  "manifests": [
+    {
+      "label": "manifest_label",
+      "claim.v2": { ... },
+      "claim_signature": { ... },
+      "assertions": [ ... ]
+    }
+  ],
+  "content": { ... },
+  "metadata": { ... },
+  "asset_info": {
+    "alg": "sha256",
+    "hash": "..."
+  }
+}
+```
+
+This is the recommended output format for most use cases as it provides the complete Trust Indicator Set.
+
+### Basic Content Analysis Mode (`<filename>.json`)
+
+**For text files**, or when using the `--basic` flag with binary files, a single basic analysis file is generated:
 
 ```json
 {
   "metadata": {
-    "inputFile": "/absolute/path/to/input.txt",
-    "fileName": "input.txt",
-    "fileSize": 1234,
+    "inputFile": "/absolute/path/to/input.jpg",
+    "fileName": "input.jpg",
+    "fileSize": 123456,
     "processedAt": "2025-06-20T10:30:00.000Z",
-    "fileExtension": ".txt"
+    "fileExtension": ".jpg"
   },
   "content": {
-    "rawContent": "file content here...",
-    "lineCount": 15,
-    "characterCount": 1234,
-    "wordCount": 200
+    "type": "binary",
+    "size": 123456,
+    "note": "Binary file content not displayed"
+  },
+  "c2pa": {
+    "fileFormat": "JPEG",
+    "hasManifestStore": true,
+    "manifestCount": 1,
+    "validationStatus": {
+      "isValid": true
+    }
   },
   "processing": {
     "status": "completed",
@@ -81,6 +166,8 @@ The CLI generates a JSON file with the following structure:
   }
 }
 ```
+
+The `--basic` flag is useful when you only need basic file information and C2PA metadata without the full Trust Indicator Set.
 
 ## Development
 
@@ -155,10 +242,13 @@ indicator-extractor/
 │   └── cli.js              # Main CLI script
 │   └── indicatorSet.js     # Create the Trust Indicator Set
 │   └── processManifest.js  # Process any C2PA/JPEG Trust Manifests
+├── testfiles/              # Test files for testing
 ├── tests/
-│   ├── utils.test.js       # Utility function tests
 │   ├── test-helpers.js     # Utility routines for tests
-│   ├── c2pa-processing.test.js         # Tests for C2PA processing
+│   ├── basic-functionality.test.js # Tests for basic functionality
+│   ├── error-handling.test.js    # Tests for error handling
+│   ├── content-analysis.test.js  # Tests for content analysis
+│   ├── c2pa-processing.test.js   # Tests for C2PA processing
 │   ├── setup.js            # Jest setup
 ├── output/                 # Output directory for processed files
 ├── coverage/               # Coverage reports (generated)
@@ -204,6 +294,16 @@ indicator-extractor/
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Changelog
+
+### v1.1.0
+- **Breaking Change**: Trust Indicator Set generation is now the default behavior
+- **Breaking Change**: Only a single JSON file is created (indicator set by default, or basic JSON with `--basic`)
+- Added support for processing multiple files in a single command (supports wildcards)
+- Changed output directory from positional argument to optional `-o` or `--output` flag (defaults to input file directory)
+- Added `--basic` flag to generate basic content analysis only (skips indicator set generation)
+- Removed `--set` flag (functionality is now default)
+- Added summary output when processing multiple files
+- Updated all tests and documentation to reflect new behavior
 
 ### v1.0.0
 - Initial release
