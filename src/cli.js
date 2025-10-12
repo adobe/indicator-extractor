@@ -28,7 +28,7 @@ program
   .argument('<input-file>', 'input file to process')
   .argument('<output-dir>', 'output directory for the JSON file')
   .option('-p, --pretty', 'pretty print JSON output', false)
-  .option('-s, --set', 'output JPEG Trust Indicator Set grammar', false)
+  .option('-b, --basic', 'output basic content analysis only (skip indicator set generation)', false)
   .action(async (inputFile, outputDir, options) => {
     try {
       await processFile(inputFile, outputDir, options);
@@ -73,8 +73,9 @@ async function processFile(inputFile, outputDir, options) {
     fileBuffer = await fs.readFile(inputPath);
 
     // Process C2PA manifests
+    // Always generate indicator set unless --basic flag is used
     if (fileBuffer) {
-      c2paInfo = await processManifestStore(fileBuffer, options.set);
+      c2paInfo = await processManifestStore(fileBuffer, !options.basic);
     }
   }
 
@@ -162,49 +163,52 @@ async function processFile(inputFile, outputDir, options) {
   }
 
 
-  if (c2paInfo && c2paInfo.hasManifestStore) {
-    console.log(`🔐 C2PA: Found ${c2paInfo.manifestCount} manifest(s), Valid: ${c2paInfo.validationStatus.isValid}`);
+  // Only generate indicator sets for binary files (images), not text files
+  if (!isTextFile) {
+    if (c2paInfo && c2paInfo.hasManifestStore) {
+      console.log(`🔐 C2PA: Found ${c2paInfo.manifestCount} manifest(s), Valid: ${c2paInfo.validationStatus.isValid}`);
 
-    // if the --set option is used, output the indicator set
-    if (options.set && c2paInfo.indicatorSet) {
-      await outputIndicatorSet(c2paInfo.indicatorSet, indicatorSetPath, options.pretty);
-    }
-  } else if (c2paInfo && c2paInfo.manifestCount === 0) {
-    console.log('🔐 C2PA: No manifests found in file');
+      // Output indicator set unless --basic option is used
+      if (!options.basic && c2paInfo.indicatorSet) {
+        await outputIndicatorSet(c2paInfo.indicatorSet, indicatorSetPath, options.pretty);
+      }
+    } else if (c2paInfo && c2paInfo.manifestCount === 0) {
+      console.log('🔐 C2PA: No manifests found in file');
 
-    // if the --set option is used, output the indicator set
-    if (options.set) {
+      // Output indicator set unless --basic option is used
+      if (!options.basic) {
+        const indicatorSet = {
+          '@context': ['https://jpeg.org/jpegtrust'],
+          manifests: [],
+          content: {},
+          metadata: {},
+        };
+        mergeIndicatorSetMetadata(c2paInfo, indicatorSet);
+        await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
+      }
+    } else if (c2paInfo && c2paInfo.error) {
+      console.log(`🔐 C2PA: Error - ${c2paInfo.error}`);
+
+      // Output indicator set unless --basic option is used
+      if (!options.basic) {
+        const indicatorSet = {
+          '@context': ['https://jpeg.org/jpegtrust'],
+          manifests: [],
+          content: {},
+          metadata: {},
+        };
+        mergeIndicatorSetMetadata(c2paInfo, indicatorSet);
+        await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
+      }
+    } else if (!options.basic) {
       const indicatorSet = {
         '@context': ['https://jpeg.org/jpegtrust'],
         manifests: [],
         content: {},
         metadata: {},
       };
-      mergeIndicatorSetMetadata(c2paInfo, indicatorSet);
       await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
     }
-  } else if (c2paInfo && c2paInfo.error) {
-    console.log(`🔐 C2PA: Error - ${c2paInfo.error}`);
-
-    // if the --set option is used, output the indicator set
-    if (options.set) {
-      const indicatorSet = {
-        '@context': ['https://jpeg.org/jpegtrust'],
-        manifests: [],
-        content: {},
-        metadata: {},
-      };
-      mergeIndicatorSetMetadata(c2paInfo, indicatorSet);
-      await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
-    }
-  } else if (options.set) {
-    const indicatorSet = {
-      '@context': ['https://jpeg.org/jpegtrust'],
-      manifests: [],
-      content: {},
-      metadata: {},
-    };
-    await outputIndicatorSet(indicatorSet, indicatorSetPath, options.pretty);
   }
 }
 

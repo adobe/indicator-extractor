@@ -1,11 +1,11 @@
 # Indicator Extractor CLI
 
-A Node.js command line application that processes JPEG 1 and PNG files and outputs structured JSON results - either simple information, or Trust Indicator Sets, as defined in ISO 21617-1.
+A Node.js command line application that processes JPEG 1, PNG, and HEIC/HEIF files and outputs structured JSON results including Trust Indicator Sets, as defined in ISO 21617-1.
 
 ## Features
 
-- 📁 **File Processing**: Process files and extract useful information, including as a Trust Indicator Set
-- 📊 **Basic Content Analysis**: Provides some useful information about the file and its content
+- 📁 **File Processing**: Process files and extract Trust Indicator Sets by default
+- 📊 **Content Analysis**: Provides useful information about the file and its content
 - 🎯 **JSON Output**: Generate structured JSON in various syntaxes
 - 🎨 **Pretty Printing**: Support for both minified and pretty-printed JSON output
 - 📂 **Directory Management**: Automatically creates output directories as needed
@@ -32,53 +32,105 @@ npm install -g .
 ### Basic Usage
 
 ```bash
-# Process a file with minified JSON output
+# Process a file with Trust Indicator Set (default, minified JSON output)
 indicator-extractor input.jpg ./output
 
-# Process a file with pretty-printed JSON output
-indicator-extractor input.jpg ./output --pretty
+# Process a file with Trust Indicator Set and pretty-printed JSON output
+indicator-extractor input.png ./output --pretty
+
+# Process a file with basic content analysis only (no indicator set)
+indicator-extractor input.jpg ./output --basic
 ```
 
 ### Using the CLI directly
 
 ```bash
-# Run from the project directory
+# Run from the project directory (generates Trust Indicator Set by default)
 node src/cli.js input.jpg ./output
 
 # With pretty printing
-node src/cli.js input.jpg ./output --pretty
+node src/cli.js input.png ./output --pretty
+
+# With basic content analysis only (no indicator set)
+node src/cli.js input.jpg ./output --basic
 ```
 
 ### Command Line Arguments
 
 - `<input-file>`: Path to the input file to process (required)
 - `<output-dir>`: Directory where the JSON output file will be created (required)
-- `-p, --pretty`: Pretty print the JSON output (optional)
-- `-s, --set`: Generate a Trust Indicator Set (optional, default is basic content analysis)
+- `-p, --pretty`: Pretty print the JSON output (optional, default: false)
+- `-b, --basic`: Output basic content analysis only, skip Trust Indicator Set generation (optional, default: false)
 
 ## Output Format
 
-The CLI generates a JSON file with the following structure:
+The CLI generates two JSON files by default:
+
+### 1. Main Output File (`<filename>.json`)
+Contains basic file information and C2PA data:
 
 ```json
 {
   "metadata": {
-    "inputFile": "/absolute/path/to/input.txt",
-    "fileName": "input.txt",
-    "fileSize": 1234,
+    "inputFile": "/absolute/path/to/input.jpg",
+    "fileName": "input.jpg",
+    "fileSize": 123456,
     "processedAt": "2025-06-20T10:30:00.000Z",
-    "fileExtension": ".txt"
+    "fileExtension": ".jpg"
   },
   "content": {
-    "rawContent": "file content here...",
-    "lineCount": 15,
-    "characterCount": 1234,
-    "wordCount": 200
+    "type": "binary",
+    "size": 123456,
+    "note": "Binary file content not displayed"
+  },
+  "c2pa": {
+    "fileFormat": "JPEG",
+    "hasManifestStore": true,
+    "manifestCount": 1,
+    "validationStatus": {
+      "isValid": true
+    }
   },
   "processing": {
     "status": "completed",
     "version": "1.0.0"
   }
+}
+```
+
+### 2. Trust Indicator Set File (`<filename>-indicators.json`)
+Contains the Trust Indicator Set as defined in ISO 21617-1:
+
+```json
+{
+  "@context": ["https://jpeg.org/jpegtrust"],
+  "manifests": [
+    {
+      "label": "manifest_label",
+      "claim.v2": { ... },
+      "claim_signature": { ... },
+      "assertions": [ ... ]
+    }
+  ],
+  "content": { ... },
+  "metadata": { ... },
+  "asset_info": {
+    "alg": "sha256",
+    "hash": "..."
+  }
+}
+```
+
+### Basic Content Analysis Mode
+
+When using the `--basic` flag (for when Trust Indicator Sets are not needed), only the main output file is generated with content analysis:
+
+```json
+{
+  "metadata": { ... },
+  "content": { ... },
+  "c2pa": { ... },
+  "processing": { ... }
 }
 ```
 
@@ -155,10 +207,13 @@ indicator-extractor/
 │   └── cli.js              # Main CLI script
 │   └── indicatorSet.js     # Create the Trust Indicator Set
 │   └── processManifest.js  # Process any C2PA/JPEG Trust Manifests
+├── testfiles/              # Test files for testing
 ├── tests/
-│   ├── utils.test.js       # Utility function tests
 │   ├── test-helpers.js     # Utility routines for tests
-│   ├── c2pa-processing.test.js         # Tests for C2PA processing
+│   ├── basic-functionality.test.js # Tests for basic functionality
+│   ├── error-handling.test.js    # Tests for error handling
+│   ├── content-analysis.test.js  # Tests for content analysis
+│   ├── c2pa-processing.test.js   # Tests for C2PA processing
 │   ├── setup.js            # Jest setup
 ├── output/                 # Output directory for processed files
 ├── coverage/               # Coverage reports (generated)
@@ -204,6 +259,12 @@ indicator-extractor/
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Changelog
+
+### v1.1.0
+- **Breaking Change**: Trust Indicator Set generation is now the default behaviour
+- Added `--basic` flag to skip Trust Indicator Set generation (replaces old default behaviour)
+- Removed `--set` flag (functionality is now default)
+- Updated all tests and documentation to reflect new default behaviour
 
 ### v1.0.0
 - Initial release

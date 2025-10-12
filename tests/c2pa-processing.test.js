@@ -17,15 +17,15 @@ const TestHelpers = require('./test-helpers');
 describe('C2PA Image Processing', () => {
   const testHelpers = new TestHelpers('c2pa-processing');
 
-  beforeEach(async() => {
+  beforeEach(async () => {
     await testHelpers.setupTestDir();
   });
 
-  afterEach(async() => {
+  afterEach(async () => {
     await testHelpers.cleanupTestDir();
   });
 
-  test('should process ChatGPT_Image.png and detect C2PA data', async() => {
+  test('should process ChatGPT_Image.png and detect C2PA data', async () => {
     await testHelpers.processFileAndValidate(
       testHelpers.imageFiles.chatgptImage,
       'ChatGPT_Image.json',
@@ -38,7 +38,7 @@ describe('C2PA Image Processing', () => {
     );
   });
 
-  test('should process Multiple_Manifests.jpg and detect multiple C2PA manifests', async() => {
+  test('should process Multiple_Manifests.jpg and detect multiple C2PA manifests', async () => {
     try {
       await testHelpers.processFileAndValidate(
         testHelpers.imageFiles.multipleManifests,
@@ -62,7 +62,7 @@ describe('C2PA Image Processing', () => {
     }
   });
 
-  test('should process SimplePhoto.jpeg and not detect any manifest', async() => {
+  test('should process SimplePhoto.jpeg and not detect any manifest', async () => {
     await testHelpers.processFileAndValidate(
       testHelpers.imageFiles.simplePhoto,
       'SimplePhoto.json',
@@ -83,7 +83,7 @@ describe('C2PA Image Processing', () => {
     );
   });
 
-  test('should handle C2PA validation results correctly', async() => {
+  test('should handle C2PA validation results correctly', async () => {
     await testHelpers.processFileAndValidate(
       testHelpers.imageFiles.chatgptImage,
       'ChatGPT_Image.json',
@@ -94,7 +94,7 @@ describe('C2PA Image Processing', () => {
     );
   });
 
-  test('should process ChatGPT_Image.png with --set option and output indicator set file', async() => {
+  test('should process ChatGPT_Image.png and output indicator set file by default', async () => {
     const outputFileName = 'ChatGPT_Image.json';
     const indicatorName = 'ChatGPT_Image-indicators.json';
 
@@ -102,7 +102,7 @@ describe('C2PA Image Processing', () => {
       outputFileName, indicatorName);
   });
 
-  test('should process Scenario 1 (std manifest)', async() => {
+  test('should process Scenario 1 (std manifest)', async () => {
     const inputFile = testHelpers.imageFiles.standardManifest;
     const inputFileName = path.basename(inputFile, path.extname(inputFile));
     const outputFileName = `${inputFileName}.json`;
@@ -111,7 +111,7 @@ describe('C2PA Image Processing', () => {
     await testHelpers.processFileAndValidateWithIndicatorSet(inputFile, outputFileName, indicatorName);
   });
 
-  test('should process Scenario 2 (extent of mods)', async() => {
+  test('should process Scenario 2 (extent of mods)', async () => {
     const inputFile = testHelpers.imageFiles.extMods;
     const inputFileName = path.basename(inputFile, path.extname(inputFile));
     const outputFileName = `${inputFileName}.json`;
@@ -120,7 +120,7 @@ describe('C2PA Image Processing', () => {
     await testHelpers.processFileAndValidateWithIndicatorSet(inputFile, outputFileName, indicatorName);
   });
 
-  test('should process Scenario 4 (CAWG Metadata)', async() => {
+  test('should process Scenario 4 (CAWG Metadata)', async () => {
     const inputFile = testHelpers.imageFiles.cawgMetadata;
     const inputFileName = path.basename(inputFile, path.extname(inputFile));
     const outputFileName = `${inputFileName}.json`;
@@ -129,7 +129,7 @@ describe('C2PA Image Processing', () => {
     await testHelpers.processFileAndValidateWithIndicatorSet(inputFile, outputFileName, indicatorName);
   });
 
-  test('should process Scenario 5 (rights assertion)', async() => {
+  test('should process Scenario 5 (rights assertion)', async () => {
     const inputFile = testHelpers.imageFiles.rightsAssertion;
     const inputFileName = path.basename(inputFile, path.extname(inputFile));
     const outputFileName = `${inputFileName}.json`;
@@ -138,7 +138,7 @@ describe('C2PA Image Processing', () => {
     await testHelpers.processFileAndValidateWithIndicatorSet(inputFile, outputFileName, indicatorName);
   });
 
-  test('should process Scenario 6 (soft binding)', async() => {
+  test('should process Scenario 6 (soft binding)', async () => {
     const inputFile = testHelpers.imageFiles.softBinding;
     const inputFileName = path.basename(inputFile, path.extname(inputFile));
     const outputFileName = `${inputFileName}.json`;
@@ -147,7 +147,7 @@ describe('C2PA Image Processing', () => {
     await testHelpers.processFileAndValidateWithIndicatorSet(inputFile, outputFileName, indicatorName);
   });
 
-  test('should process s11-trust-declaration.jpeg and detect ManifestStore with no manifests', async() => {
+  test('should process s11-trust-declaration.jpeg and detect ManifestStore with no manifests', async () => {
     await testHelpers.processFileAndValidate(
       testHelpers.imageFiles.trustDeclaration,
       's11-trust-declaration.json',

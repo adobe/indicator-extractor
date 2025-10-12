@@ -38,7 +38,7 @@ async function extractMetadata(fileBuffer) {
       // There could be mutliple XMP namespaces with the same properties
       // We don't want them to overwrite each other.
       mergeOutput: false,
-    }
+    };
 
     const tags = await exifr.parse(fileBuffer, options);
 
@@ -262,22 +262,22 @@ function processHashedURIs(hashedURIs) {
 
 function getSignatureAlgoName(algorithm) {
   switch (algorithm.coseIdentifier) {
-    case -7:
-      return 'ES256';
-    case -35:
-      return 'ES384';
-    case -36:
-      return 'ES512';
-    case -37:
-      return 'PS256';
-    case -38:
-      return 'PS384';
-    case -39:
-      return 'PS512';
-    case -8:
-      return 'Ed25519';
-    default:
-      return 'Unknown';
+  case -7:
+    return 'ES256';
+  case -35:
+    return 'ES384';
+  case -36:
+    return 'ES512';
+  case -37:
+    return 'PS256';
+  case -38:
+    return 'PS384';
+  case -39:
+    return 'PS512';
+  case -8:
+    return 'Ed25519';
+  default:
+    return 'Unknown';
   }
 }
 

@@ -1,8 +1,8 @@
 {
   "name": "indicator-extractor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
-  "description": "CLI tool to process files and output JSON results",
+  "description": "CLI tool to process files and output Trust Indicator Set JSON results",
   "main": "src/cli.js",
   "bin": {
     "indicator-extractor": "./src/cli.js"

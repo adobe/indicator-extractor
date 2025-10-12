@@ -12,7 +12,8 @@
       "args": [
         "${workspaceFolder}/testfiles/test.txt",
         "${workspaceFolder}/output",
-        "--pretty"
+        "--pretty",
+        "--basic"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -51,8 +52,7 @@
       "args": [
         "${workspaceFolder}/testfiles/ChatGPT_Image.png",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -78,8 +78,7 @@
       "args": [
         "${workspaceFolder}/testfiles/Multiple_Manifests.jpg",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -92,8 +91,7 @@
       "args": [
         "${workspaceFolder}/testfiles/sample-out.heif",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -106,8 +104,7 @@
       "args": [
         "${workspaceFolder}/testfiles/scenario_1_v2.jpeg",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -120,8 +117,7 @@
       "args": [
         "${workspaceFolder}/testfiles/scenario_2_ExtMods.jpeg",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -134,8 +130,7 @@
       "args": [
         "${workspaceFolder}/testfiles/scenario_4_CAWGM.jpeg",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -148,8 +143,7 @@
       "args": [
         "${workspaceFolder}/testfiles/scenario_5_Rights.jpeg",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -162,8 +156,7 @@
       "args": [
         "${workspaceFolder}/testfiles/scenario_6_SoftBinding.jpeg",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -176,8 +169,7 @@
       "args": [
         "${workspaceFolder}/testfiles/scenario_9_ProtectedAssertion.jpeg",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -190,8 +182,7 @@
       "args": [
         "${workspaceFolder}/testfiles/scenario_10_ProtectedManifest_v2.jpeg",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -204,8 +195,7 @@
       "args": [
         "${workspaceFolder}/testfiles/s11-trust-declaration.jpeg",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -218,8 +208,7 @@
       "args": [
         "${workspaceFolder}/testfiles/XMP-only-example1.jpg",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
@@ -232,8 +221,7 @@
       "args": [
         "${workspaceFolder}/testfiles/runway_cai.png",
         "${workspaceFolder}/output",
-        "--pretty",
-        "--set"
+        "--pretty"
       ],
     }
   ]
