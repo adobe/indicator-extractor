@@ -26,11 +26,13 @@ program
 
 program
   .argument('<input-file>', 'input file to process')
-  .argument('<output-dir>', 'output directory for the JSON file')
+  .option('-o, --output <output-dir>', 'output directory for the JSON file (defaults to input file directory)')
   .option('-p, --pretty', 'pretty print JSON output', false)
   .option('-b, --basic', 'output basic content analysis only (skip indicator set generation)', false)
-  .action(async (inputFile, outputDir, options) => {
+  .action(async (inputFile, options) => {
     try {
+      // If no output directory specified, use the directory of the input file
+      const outputDir = options.output || path.dirname(path.resolve(inputFile));
       await processFile(inputFile, outputDir, options);
     } catch (error) {
       console.error('Error:', error.message);

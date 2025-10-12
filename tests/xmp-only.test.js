@@ -16,15 +16,15 @@ const TestHelpers = require('./test-helpers');
 describe('XMP-only Processing', () => {
   const testHelpers = new TestHelpers('xmp-only');
 
-  beforeEach(async () => {
+  beforeEach(async() => {
     await testHelpers.setupTestDir();
   });
 
-  afterEach(async () => {
+  afterEach(async() => {
     await testHelpers.cleanupTestDir();
   });
 
-  test('should process XMP-only-example1.jpg and extract XMP metadata without C2PA manifests', async () => {
+  test('should process XMP-only-example1.jpg and extract XMP metadata without C2PA manifests', async() => {
     const xmpOnlyFile = path.join(testHelpers.testFilesDir, 'XMP-only-example1.jpg');
 
     await testHelpers.processFileAndValidate(
@@ -100,7 +100,7 @@ describe('XMP-only Processing', () => {
     );
   });
 
-  test('should process XMP-only-example1.jpg and generate indicator set file by default', async () => {
+  test('should process XMP-only-example1.jpg and generate indicator set file by default', async() => {
     const xmpOnlyFile = path.join(testHelpers.testFilesDir, 'XMP-only-example1.jpg');
     const outputFileName = 'XMP-only-example1.json';
     const indicatorFileName = 'XMP-only-example1-indicators.json';

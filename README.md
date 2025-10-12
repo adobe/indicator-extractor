@@ -32,33 +32,42 @@ npm install -g .
 ### Basic Usage
 
 ```bash
-# Process a file with Trust Indicator Set (default, minified JSON output)
-indicator-extractor input.jpg ./output
+# Process a file with Trust Indicator Set (output to same directory as input file)
+indicator-extractor input.jpg
 
 # Process a file with Trust Indicator Set and pretty-printed JSON output
-indicator-extractor input.png ./output --pretty
+indicator-extractor input.png --pretty
 
 # Process a file with basic content analysis only (no indicator set)
-indicator-extractor input.jpg ./output --basic
+indicator-extractor input.jpg --basic
+
+# Specify output directory with -o flag
+indicator-extractor input.jpg -o ./output
+
+# You can also use --output instead of -o
+indicator-extractor input.jpg --output ./output --pretty
 ```
 
 ### Using the CLI directly
 
 ```bash
-# Run from the project directory (generates Trust Indicator Set by default)
-node src/cli.js input.jpg ./output
+# Run from the project directory (output to same directory as input file)
+node src/cli.js input.jpg
 
 # With pretty printing
-node src/cli.js input.png ./output --pretty
+node src/cli.js input.png --pretty
 
 # With basic content analysis only (no indicator set)
-node src/cli.js input.jpg ./output --basic
+node src/cli.js input.jpg --basic
+
+# Specify output directory
+node src/cli.js input.jpg -o ./output --pretty
 ```
 
 ### Command Line Arguments
 
 - `<input-file>`: Path to the input file to process (required)
-- `<output-dir>`: Directory where the JSON output file will be created (required)
+- `-o, --output <output-dir>`: Directory where the JSON output file will be created (optional, defaults to input file directory)
 - `-p, --pretty`: Pretty print the JSON output (optional, default: false)
 - `-b, --basic`: Output basic content analysis only, skip Trust Indicator Set generation (optional, default: false)
 
@@ -262,6 +271,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ### v1.1.0
 - **Breaking Change**: Trust Indicator Set generation is now the default behaviour
+- Changed output directory from positional argument to optional `-o` or `--output` flag (defaults to input file directory)
 - Added `--basic` flag to skip Trust Indicator Set generation (replaces old default behaviour)
 - Removed `--set` flag (functionality is now default)
 - Updated all tests and documentation to reflect new default behaviour

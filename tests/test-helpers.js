@@ -62,7 +62,7 @@ class TestHelpers {
    */
   runCLI(inputFile, outputDir = this.testDir, flags = []) {
     const flagsStr = flags.length > 0 ? ` ${flags.join(' ')}` : '';
-    const command = `node "${this.cliPath}" "${inputFile}" "${outputDir}"${flagsStr}`;
+    const command = `node "${this.cliPath}" "${inputFile}" -o "${outputDir}"${flagsStr}`;
     return execSync(command, {
       encoding: 'utf8',
       env: {
@@ -83,7 +83,7 @@ class TestHelpers {
    */
   runCLIWithBuffer(inputFile, outputDir = this.testDir, flags = [], maxBuffer = 1024 * 1024) {
     const flagsStr = flags.length > 0 ? ` ${flags.join(' ')}` : '';
-    const command = `node "${this.cliPath}" "${inputFile}" "${outputDir}"${flagsStr}`;
+    const command = `node "${this.cliPath}" "${inputFile}" -o "${outputDir}"${flagsStr}`;
     return execSync(command, {
       encoding: 'utf8',
       maxBuffer,
