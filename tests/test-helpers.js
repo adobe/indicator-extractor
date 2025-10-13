@@ -34,15 +34,45 @@ class TestHelpers {
    * Setup test directory - call in beforeEach
    */
   async setupTestDir() {
-    await fs.remove(this.testDir);
-    await fs.ensureDir(this.testDir);
+    // Use sync operations to ensure directory is fully setup before tests run
+    // This prevents race conditions with child processes
+    try {
+      if (fs.existsSync(this.testDir)) {
+        fs.removeSync(this.testDir);
+      }
+    } catch (err) {
+      // Ignore errors during removal - directory might be locked or in use
+      console.warn(`Warning: Could not remove test directory: ${this.testDir} - ${err.message}`);
+    }
+
+    // Ensure directory exists, retry if necessary
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        fs.ensureDirSync(this.testDir);
+        // Verify directory was actually created
+        if (fs.existsSync(this.testDir)) {
+          break;
+        }
+      } catch (err) {
+        retries--;
+        if (retries === 0) {
+          throw new Error(`Failed to create test directory: ${this.testDir} - ${err.message}`);
+        }
+        // Wait a bit before retrying
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+    }
   }
 
   /**
    * Cleanup test directory - call in afterEach
    */
   async cleanupTestDir() {
-    await fs.remove(this.testDir);
+    // Use sync operation to ensure directory is fully removed
+    if (fs.existsSync(this.testDir)) {
+      fs.removeSync(this.testDir);
+    }
   }
 
   /**
@@ -50,7 +80,9 @@ class TestHelpers {
    */
   static async cleanupAllTestDirs() {
     const tempBaseDir = path.join(__dirname, 'temp');
-    await fs.remove(tempBaseDir);
+    if (fs.existsSync(tempBaseDir)) {
+      fs.removeSync(tempBaseDir);
+    }
   }
 
   /**
@@ -114,7 +146,24 @@ class TestHelpers {
    */
   async createTestFile(filename, content) {
     const filePath = path.join(this.testDir, filename);
-    await fs.writeFile(filePath, content, 'utf8');
+    // Use writeFileSync to ensure file is fully written before returning
+    // This prevents race conditions when the file is immediately read by a subprocess
+    fs.writeFileSync(filePath, content, 'utf8');
+
+    // Verify file exists before returning
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Failed to create test file: ${filePath}`);
+    }
+
+    // For empty files, explicitly verify we can read them
+    if (content === '') {
+      try {
+        fs.readFileSync(filePath, 'utf8');
+      } catch (err) {
+        throw new Error(`Created empty file is not readable: ${filePath} - ${err.message}`);
+      }
+    }
+
     return filePath;
   }
 
