@@ -49,50 +49,44 @@ describe('XMP-only Processing', () => {
 
           const metadata = outputData.c2pa.indicatorSet.metadata;
 
-          // Verify XMP MM metadata
-          expect(metadata).toHaveProperty('xmpMM');
-          expect(metadata.xmpMM).toHaveProperty('OriginalDocumentID');
-          expect(metadata.xmpMM).toHaveProperty('DocumentID');
-          expect(metadata.xmpMM).toHaveProperty('InstanceID');
-          expect(metadata.xmpMM.OriginalDocumentID).toBe('xmp.did:129191f5-5fa5-4ee3-abc5-47b606f3bce8');
-          expect(metadata.xmpMM.DocumentID).toBe('xmp.did:554486fa-db03-4f9b-a7b1-232f7fb710f4');
-          expect(metadata.xmpMM.InstanceID).toBe('xmp.iid:554486fa-db03-4f9b-a7b1-232f7fb710f4');
+          // Verify XMP MM metadata (flattened structure with colons)
+          expect(metadata).toHaveProperty('xmpMM:OriginalDocumentID');
+          expect(metadata).toHaveProperty('xmpMM:DocumentID');
+          expect(metadata).toHaveProperty('xmpMM:InstanceID');
+          expect(metadata['xmpMM:OriginalDocumentID']).toBe('xmp.did:129191f5-5fa5-4ee3-abc5-47b606f3bce8');
+          expect(metadata['xmpMM:DocumentID']).toBe('xmp.did:554486fa-db03-4f9b-a7b1-232f7fb710f4');
+          expect(metadata['xmpMM:InstanceID']).toBe('xmp.iid:554486fa-db03-4f9b-a7b1-232f7fb710f4');
 
           // Verify XMP metadata
-          expect(metadata).toHaveProperty('xmp');
-          expect(metadata.xmp).toHaveProperty('MetadataDate');
-          expect(metadata.xmp.MetadataDate).toBe('2025-09-30T12:30:06-04:00');
+          expect(metadata).toHaveProperty('xmp:MetadataDate');
+          expect(metadata['xmp:MetadataDate']).toBe('2025-09-30T12:30:06-04:00');
 
           // Verify PLUS metadata
-          expect(metadata).toHaveProperty('plus');
-          expect(metadata.plus).toHaveProperty('ImageSupplierImageID');
-          expect(metadata.plus).toHaveProperty('ImageSupplier');
-          expect(metadata.plus.ImageSupplierImageID).toBe('d3136ee3-0fe8-4283-926a-7f644e58f461');
-          expect(metadata.plus.ImageSupplier.ImageSupplierName).toBe('Adobe');
+          expect(metadata).toHaveProperty('plus:ImageSupplierImageID');
+          expect(metadata['plus:ImageSupplierImageID']).toBe('d3136ee3-0fe8-4283-926a-7f644e58f461');
+          expect(metadata).toHaveProperty('plus:ImageSupplier:ImageSupplierName');
+          expect(metadata['plus:ImageSupplier:ImageSupplierName']).toBe('Adobe');
 
           // Verify IPTC4XMP Extension metadata
-          expect(metadata).toHaveProperty('iptc4xmpExt');
-          expect(metadata.iptc4xmpExt).toHaveProperty('AODateCreated');
-          expect(metadata.iptc4xmpExt).toHaveProperty('DigitalSourceType');
-          expect(metadata.iptc4xmpExt).toHaveProperty('Contributor');
-          expect(metadata.iptc4xmpExt.AODateCreated).toBe('2025-09-09T16:00:49.035Z');
-          expect(metadata.iptc4xmpExt.DigitalSourceType).toBe('http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia');
-          expect(metadata.iptc4xmpExt.Contributor.Name.value).toBe('Adobe Firefly 3.1');
+          expect(metadata).toHaveProperty('iptc4xmpExt:AODateCreated');
+          expect(metadata).toHaveProperty('iptc4xmpExt:DigitalSourceType');
+          expect(metadata).toHaveProperty('iptc4xmpExt:Contributor:Name:value');
+          expect(metadata['iptc4xmpExt:AODateCreated']).toBe('2025-09-09T16:00:49.035Z');
+          expect(metadata['iptc4xmpExt:DigitalSourceType']).toBe('http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia');
+          expect(metadata['iptc4xmpExt:Contributor:Name:value']).toBe('Adobe Firefly 3.1');
 
           // Verify EXIF metadata
-          expect(metadata).toHaveProperty('ifd0');
-          expect(metadata.ifd0).toHaveProperty('XResolution');
-          expect(metadata.ifd0).toHaveProperty('YResolution');
-          expect(metadata.ifd0).toHaveProperty('ResolutionUnit');
-          expect(metadata.ifd0.XResolution).toBe(300);
-          expect(metadata.ifd0.YResolution).toBe(300);
-          expect(metadata.ifd0.ResolutionUnit).toBe('inches');
+          expect(metadata).toHaveProperty('ifd0:XResolution');
+          expect(metadata).toHaveProperty('ifd0:YResolution');
+          expect(metadata).toHaveProperty('ifd0:ResolutionUnit');
+          expect(metadata['ifd0:XResolution']).toBe(300);
+          expect(metadata['ifd0:YResolution']).toBe(300);
+          expect(metadata['ifd0:ResolutionUnit']).toBe('inches');
 
-          expect(metadata).toHaveProperty('exif');
-          expect(metadata.exif).toHaveProperty('ExifVersion');
-          expect(metadata.exif).toHaveProperty('ColorSpace');
-          expect(metadata.exif.ExifVersion).toBe('2.3.1');
-          expect(metadata.exif.ColorSpace).toBe(1);
+          expect(metadata).toHaveProperty('exif:ExifVersion');
+          expect(metadata).toHaveProperty('exif:ColorSpace');
+          expect(metadata['exif:ExifVersion']).toBe('2.3.1');
+          expect(metadata['exif:ColorSpace']).toBe(1);
 
           // Check CLI output indicates no C2PA manifests
           expect(result).toContain('C2PA: No manifests found');
@@ -134,14 +128,15 @@ describe('XMP-only Processing', () => {
     expect(indicatorSetData).toHaveProperty('metadata');
     expect(typeof indicatorSetData.metadata).toBe('object');
 
-    // Verify XMP metadata is present in the indicator set
+    // Verify XMP metadata is present in the indicator set (flattened structure)
     const metadata = indicatorSetData.metadata;
-    expect(metadata).toHaveProperty('xmpMM');
-    expect(metadata).toHaveProperty('xmp');
-    expect(metadata).toHaveProperty('plus');
-    expect(metadata).toHaveProperty('iptc4xmpExt');
-    expect(metadata).toHaveProperty('ifd0');
-    expect(metadata).toHaveProperty('exif');
+    // Check for some key XMP properties with colon notation
+    expect(metadata).toHaveProperty('xmpMM:DocumentID');
+    expect(metadata).toHaveProperty('xmp:MetadataDate');
+    expect(metadata).toHaveProperty('plus:ImageSupplierImageID');
+    expect(metadata).toHaveProperty('iptc4xmpExt:AODateCreated');
+    expect(metadata).toHaveProperty('ifd0:XResolution');
+    expect(metadata).toHaveProperty('exif:ExifVersion');
 
     // Check CLI output mentions Output file
     expect(result).toContain('Output:');
