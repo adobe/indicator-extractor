@@ -77,6 +77,67 @@ async function extractMetadata(fileBuffer) {
     };
   }
 }
+/**
+ * Recursively flattens a nested object into a single-level object with colon-separated keys.
+ * 
+ * @param {Object} obj - The object to flatten
+ * @param {string} prefix - The prefix to prepend to keys (used in recursion)
+ * @param {Object} result - The accumulator object for flattened key-value pairs
+ * @returns {Object} The flattened object
+ * @private
+ */
+function flattenObject(obj, prefix = '', result = {}) {
+  for (const key of Object.keys(obj)) {
+    // Skip @context at the top level - it should not be flattened
+    if (key === '@context' && prefix === '') {
+      result[key] = obj[key];
+      continue;
+    }
+
+    const value = obj[key];
+    const newKey = prefix ? `${prefix}:${key}` : key;
+
+    // If the value is an object (but not null or array), recurse
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      flattenObject(value, newKey, result);
+    } else {
+      // It's a primitive value or array, add it to the result
+      result[newKey] = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * Formats the metadata into XMP JSON-LD syntax (as per ISO 21617-1)
+ * Converts nested objects like {foo: {bar: {baz: 1}}} into flattened {"foo:bar:baz": 1}
+ * 
+ * @param {Object} metadata - The metadata object to format (modified in place)
+ */
+function formatMetadata(metadata) {
+  // Get the flattened version
+  const flattened = flattenObject(metadata);
+
+  // Clear the original metadata object
+  for (const key of Object.keys(metadata)) {
+    delete metadata[key];
+  }
+
+  // Add the @context with standard XMP namespace definitions
+  metadata['@context'] = {
+    "xmp": 'http://ns.adobe.com/xap/1.0/',
+    "xmpMM": 'http://ns.adobe.com/xap/1.0/mm/',
+    "plus": 'http://ns.adobe.com/xap/1.0/plus/',
+    'exif': 'http://ns.adobe.com/exif/1.0/',
+    'exifEX': 'http://cipa.jp/exif/2.32/',
+    'tiff': 'http://ns.adobe.com/tiff/1.0/',
+    'Iptc4xmpCore': 'http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/',
+    'Iptc4xmpExt': 'http://iptc.org/std/Iptc4xmpExt/2008-02-29/',
+  };
+
+  // Copy flattened properties back to metadata
+  Object.assign(metadata, flattened);
+}
 
 /**
  * Moves specific metadata keys to the content object if present.
@@ -262,22 +323,22 @@ function processHashedURIs(hashedURIs) {
 
 function getSignatureAlgoName(algorithm) {
   switch (algorithm.coseIdentifier) {
-  case -7:
-    return 'ES256';
-  case -35:
-    return 'ES384';
-  case -36:
-    return 'ES512';
-  case -37:
-    return 'PS256';
-  case -38:
-    return 'PS384';
-  case -39:
-    return 'PS512';
-  case -8:
-    return 'Ed25519';
-  default:
-    return 'Unknown';
+    case -7:
+      return 'ES256';
+    case -35:
+      return 'ES384';
+    case -36:
+      return 'ES512';
+    case -37:
+      return 'PS256';
+    case -38:
+      return 'PS384';
+    case -39:
+      return 'PS512';
+    case -8:
+      return 'Ed25519';
+    default:
+      return 'Unknown';
   }
 }
 
@@ -321,7 +382,9 @@ async function generateIndicatorSet(manifestStore, validationResult, fileBuffer)
   }
 
   // Extract metadata using exifr if fileBuffer is provided
+  // and then re-format the metadata into XMP JSON-LD syntax (as pdf 21617-1)
   indicatorSet.metadata = await extractMetadata(fileBuffer);
+  formatMetadata(indicatorSet.metadata);
 
   // Move specific metadata keys to the content object if present
   moveMetadataKeysToContent(indicatorSet);
@@ -414,4 +477,4 @@ function mergeIndicatorSetMetadata(c2paInfo, outputData) {
   }
 }
 
-export { generateIndicatorSet, extractMetadata, mergeIndicatorSetMetadata };
+export { generateIndicatorSet, extractMetadata, formatMetadata, mergeIndicatorSetMetadata };

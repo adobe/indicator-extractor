@@ -190,6 +190,11 @@ describe('C2PA Image Processing', () => {
     // Run CLI with multiple files
     const result = testHelpers.runCLI(inputFiles, testHelpers.testDir, ['--pretty']);
 
+    // Small delay to allow file system to complete all writes
+    // This is needed because processing multiple large image files with C2PA data
+    // generates substantial output that may not be fully flushed when execSync returns
+    await new Promise(resolve => setTimeout(resolve, 200));
+
     // Check that indicator set files were created (only indicator sets, no basic JSON files)
     const chatgptIndicators = path.join(testHelpers.testDir, 'ChatGPT_Image-indicators.json');
     const simplePhotoIndicators = path.join(testHelpers.testDir, 'SimplePhoto-indicators.json');
